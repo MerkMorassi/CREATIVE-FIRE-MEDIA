@@ -1,0 +1,1706 @@
+{
+  "jungian_core": {
+    "self": {
+      "name": "The Self",
+      "traits": [
+        "Unified",
+        "Wholeness",
+        "Center"
+      ],
+      "motivation": "To achieve individuation and balance.",
+      "shadow": "The Ego / The Narcissist"
+    },
+    "shadow": {
+      "name": "The Shadow",
+      "traits": [
+        "Hidden",
+        "Repressed",
+        "Darkness"
+      ],
+      "motivation": "To hide the unacceptable parts of the psyche.",
+      "shadow": "The Projected Evil"
+    },
+    "anima": {
+      "name": "The Anima",
+      "traits": [
+        "Feminine",
+        "Emotional",
+        "Intuitive"
+      ],
+      "motivation": "To connect the male psyche to the soul.",
+      "shadow": "The Femme Fatale"
+    },
+    "animus": {
+      "name": "The Animus",
+      "traits": [
+        "Masculine",
+        "Logical",
+        "Assertive"
+      ],
+      "motivation": "To provide structure to the female psyche.",
+      "shadow": "The Tyrant / The Bluebeard"
+    },
+    "persona": {
+      "name": "The Persona",
+      "traits": [
+        "Social Mask",
+        "Adaptive",
+        "Camouflage"
+      ],
+      "motivation": "To fit into society and protect the ego.",
+      "shadow": "The Conformist / The Fake"
+    }
+  },
+  "masculine_moore": {
+    "king": {
+      "name": "The King",
+      "traits": [
+        "Ordering",
+        "Blessing",
+        "Centered"
+      ],
+      "motivation": "To provide order and fertility to the kingdom.",
+      "shadow": "The Tyrant / The Weakling"
+    },
+    "warrior": {
+      "name": "The Warrior",
+      "traits": [
+        "Disciplined",
+        "Aggressive",
+        "Loyal"
+      ],
+      "motivation": "To destroy the enemies of the kingdom.",
+      "shadow": "The Sadist / The Masochist"
+    },
+    "magician": {
+      "name": "The Magician",
+      "traits": [
+        "All-Knowing",
+        "Detached",
+        "Tech-Savvy"
+      ],
+      "motivation": "To master hidden knowledge.",
+      "shadow": "The Detached Manipulator / The Denying Innocent"
+    },
+    "lover": {
+      "name": "The Lover",
+      "traits": [
+        "Passionate",
+        "Sensual",
+        "Connected"
+      ],
+      "motivation": "To experience oneness with the world.",
+      "shadow": "The Addicted Lover / The Impotent Lover"
+    }
+  },
+  "feminine_bolen": {
+    "great_mother": {
+      "name": "The Great Mother",
+      "traits": [
+        "Nurturing",
+        "Fertile",
+        "Protective"
+      ],
+      "motivation": "To give and sustain life.",
+      "shadow": "The Devouring Mother"
+    },
+    "queen": {
+      "name": "The Queen",
+      "traits": [
+        "Regal",
+        "Sovereign",
+        "Commanding"
+      ],
+      "motivation": "To rule her domain with grace.",
+      "shadow": "The Ice Queen"
+    },
+    "huntress": {
+      "name": "The Huntress",
+      "traits": [
+        "Independent",
+        "Focused",
+        "Competitor"
+      ],
+      "motivation": "To achieve goals without reliance on others.",
+      "shadow": "The Amazon"
+    },
+    "mystic": {
+      "name": "The Mystic",
+      "traits": [
+        "Spiritual",
+        "Otherworldly",
+        "Introspective"
+      ],
+      "motivation": "To connect with the divine.",
+      "shadow": "The Space Cadet"
+    }
+  },
+  "pearson_12": {
+    "innocent": {
+      "name": "The Innocent",
+      "traits": [
+        "Optimistic",
+        "Trusting",
+        "Pure"
+      ],
+      "motivation": "To reach paradise.",
+      "shadow": "The Denying Innocent"
+    },
+    "orphan": {
+      "name": "The Orphan",
+      "traits": [
+        "Realistic",
+        "Empathetic",
+        "Survivor"
+      ],
+      "motivation": "To belong.",
+      "shadow": "The Victim"
+    },
+    "hero": {
+      "name": "The Hero",
+      "traits": [
+        "Courageous",
+        "Strong",
+        "Competent"
+      ],
+      "motivation": "To prove worth through courageous action.",
+      "shadow": "The Bully"
+    },
+    "caregiver": {
+      "name": "The Caregiver",
+      "traits": [
+        "Compassionate",
+        "Generous",
+        "Parental"
+      ],
+      "motivation": "To protect and care for others.",
+      "shadow": "The Martyr"
+    },
+    "explorer": {
+      "name": "The Explorer",
+      "traits": [
+        "Independent",
+        "Ambitious",
+        "Wanderer"
+      ],
+      "motivation": "To experience a better, more authentic life.",
+      "shadow": "The Aimless Wanderer"
+    },
+    "rebel": {
+      "name": "The Rebel",
+      "traits": [
+        "Disruptive",
+        "Revolutionary",
+        "Wild"
+      ],
+      "motivation": "To overturn what isn't working.",
+      "shadow": "The Criminal / The Destroyer"
+    },
+    "creator": {
+      "name": "The Creator",
+      "traits": [
+        "Creative",
+        "Imaginative",
+        "Artistic"
+      ],
+      "motivation": "To realize a vision.",
+      "shadow": "The Perfectionist"
+    },
+    "ruler": {
+      "name": "The Ruler",
+      "traits": [
+        "Responsible",
+        "Organized",
+        "Leader"
+      ],
+      "motivation": "To create a prosperous, successful family or community.",
+      "shadow": "The Tyrant"
+    },
+    "magician_pearson": {
+      "name": "The Magician (Catalyst)",
+      "traits": [
+        "Visionary",
+        "Transformative",
+        "Charismatic"
+      ],
+      "motivation": "To make dreams come true.",
+      "shadow": "The Manipulator"
+    },
+    "sage": {
+      "name": "The Sage",
+      "traits": [
+        "Wise",
+        "Analytical",
+        "Objective"
+      ],
+      "motivation": "To find the truth.",
+      "shadow": "The Dogmatist"
+    },
+    "jester": {
+      "name": "The Jester",
+      "traits": [
+        "Joyful",
+        "Funny",
+        "Lighthearted"
+      ],
+      "motivation": "To live in the moment with full enjoyment.",
+      "shadow": "The Irresponsible Hedonist"
+    }
+  },
+  "professional_modern": {
+    "architect": {
+      "name": "The Architect",
+      "traits": [
+        "Systematic",
+        "Visionary",
+        "Builder"
+      ],
+      "motivation": "To design structures that endure.",
+      "shadow": "The Over-Controller"
+    },
+    "engineer": {
+      "name": "The Engineer",
+      "traits": [
+        "Problem-Solver",
+        "Logical",
+        "Structural"
+      ],
+      "motivation": "To make things work efficiently.",
+      "shadow": "The Saboteur"
+    },
+    "judge": {
+      "name": "The Judge",
+      "traits": [
+        "Fair",
+        "Discernment",
+        "Authority"
+      ],
+      "motivation": "To uphold the law and balance.",
+      "shadow": "The Corrupt Official"
+    },
+    "detective": {
+      "name": "The Detective",
+      "traits": [
+        "Observant",
+        "Cynical",
+        "Persistent"
+      ],
+      "motivation": "To uncover the hidden truth.",
+      "shadow": "The Voyeur"
+    },
+    "hacker": {
+      "name": "The Hacker",
+      "traits": [
+        "Subversive",
+        "Intelligent",
+        "Invisible"
+      ],
+      "motivation": "To bypass the system's walls.",
+      "shadow": "The Cyber-Terrorist"
+    },
+    "mediator": {
+      "name": "The Mediator",
+      "traits": [
+        "Diplomatic",
+        "Neutral",
+        "Bridge-Builder"
+      ],
+      "motivation": "To resolve conflict.",
+      "shadow": "The Fence-Sitter"
+    }
+  },
+  "mystical_mythic": {
+    "alchemist": {
+      "name": "The Alchemist",
+      "traits": [
+        "Transformative",
+        "Scientific",
+        "Magical"
+      ],
+      "motivation": "To turn lead into gold.",
+      "shadow": "The Fraud"
+    },
+    "oracle": {
+      "name": "The Oracle",
+      "traits": [
+        "Prophetic",
+        "Blind",
+        "Truth-Speaker"
+      ],
+      "motivation": "To speak fate.",
+      "shadow": "The Doomsayer"
+    },
+    "shapeshifter": {
+      "name": "The Shapeshifter",
+      "traits": [
+        "Adaptable",
+        "Deceptive",
+        "Fluid"
+      ],
+      "motivation": "To survive by changing.",
+      "shadow": "The Traitor"
+    },
+    "vampire": {
+      "name": "The Vampire",
+      "traits": [
+        "Parasitic",
+        "Seductive",
+        "Immortal"
+      ],
+      "motivation": "To feed on life.",
+      "shadow": "The Donor"
+    },
+    "zombie": {
+      "name": "The Zombie",
+      "traits": [
+        "Mindless",
+        "Consumer",
+        "Horde"
+      ],
+      "motivation": "To consume.",
+      "shadow": "The Awake"
+    }
+  },
+  "master_archive_a_z": {
+    "accountant": {
+      "name": "The Accountant",
+      "traits": [
+        "Precise",
+        "Methodical",
+        "Conservative"
+      ],
+      "motivation": "To maintain order and accuracy.",
+      "shadow": "The Miser"
+    },
+    "achiever": {
+      "name": "The Achiever",
+      "traits": [
+        "Driven",
+        "Competitive",
+        "Goal-Oriented"
+      ],
+      "motivation": "To prove worth through success.",
+      "shadow": "The Burnout"
+    },
+    "addict": {
+      "name": "The Addict",
+      "traits": [
+        "Compulsive",
+        "Dependent",
+        "Escapist"
+      ],
+      "motivation": "To numb pain.",
+      "shadow": "The Self-Destructor"
+    },
+    "adonis": {
+      "name": "The Adonis",
+      "traits": [
+        "Beautiful",
+        "Vanity",
+        "Desired"
+      ],
+      "motivation": "To be admired.",
+      "shadow": "The Aging Narcissist"
+    },
+    "adventurer": {
+      "name": "The Adventurer",
+      "traits": [
+        "Daring",
+        "Restless",
+        "Bold"
+      ],
+      "motivation": "To discover the unknown.",
+      "shadow": "The Reckless Drifter"
+    },
+    "advocate": {
+      "name": "The Advocate",
+      "traits": [
+        "Defensive",
+        "Loyal",
+        "Protective"
+      ],
+      "motivation": "To stand up for others.",
+      "shadow": "The Self-Righteous Crusader"
+    },
+    "amateur": {
+      "name": "The Amateur",
+      "traits": [
+        "Enthusiastic",
+        "Unskilled",
+        "Pure"
+      ],
+      "motivation": "To do something for love.",
+      "shadow": "The Dilettante"
+    },
+    "ambassador": {
+      "name": "The Ambassador",
+      "traits": [
+        "Diplomatic",
+        "Representative",
+        "Tactful"
+      ],
+      "motivation": "To bridge two worlds.",
+      "shadow": "The Double Agent"
+    },
+    "analyst": {
+      "name": "The Analyst",
+      "traits": [
+        "Logical",
+        "Observant",
+        "Detached"
+      ],
+      "motivation": "To understand the system.",
+      "shadow": "The Paralysis by Analysis"
+    },
+    "anarchist": {
+      "name": "The Anarchist",
+      "traits": [
+        "Disruptive",
+        "Anti-Authoritarian",
+        "Chaotic"
+      ],
+      "motivation": "To tear down structures.",
+      "shadow": "The Nihilist"
+    },
+    "anchorite": {
+      "name": "The Anchorite",
+      "traits": [
+        "Solitary",
+        "Religious",
+        "Walled-In"
+      ],
+      "motivation": "To seek God in isolation.",
+      "shadow": "The Prisoner"
+    },
+    "angel": {
+      "name": "The Angel",
+      "traits": [
+        "Pure",
+        "Messenger",
+        "Benevolent"
+      ],
+      "motivation": "To bring light.",
+      "shadow": "The Fallen Angel"
+    },
+    "apprentice": {
+      "name": "The Apprentice",
+      "traits": [
+        "Eager",
+        "Learning",
+        "Subservient"
+      ],
+      "motivation": "To master the craft.",
+      "shadow": "The Sorcerer's Apprentice"
+    },
+    "arbitrator": {
+      "name": "The Arbitrator",
+      "traits": [
+        "Neutral",
+        "Judicious",
+        "Fair"
+      ],
+      "motivation": "To resolve conflict.",
+      "shadow": "The Indecisive"
+    },
+    "artisan": {
+      "name": "The Artisan",
+      "traits": [
+        "Skilled",
+        "Focused",
+        "Creative"
+      ],
+      "motivation": "To create functional beauty.",
+      "shadow": "The Perfectionist"
+    },
+    "artist": {
+      "name": "The Artist",
+      "traits": [
+        "Expressive",
+        "Sensitive",
+        "Imaginative"
+      ],
+      "motivation": "To externalize truth.",
+      "shadow": "The Self-Indulgent Dreamer"
+    },
+    "athlete": {
+      "name": "The Athlete",
+      "traits": [
+        "Physical",
+        "Competitive",
+        "Disciplined"
+      ],
+      "motivation": "To push limits.",
+      "shadow": "The Dumb Jock"
+    },
+    "attila": {
+      "name": "The Attila",
+      "traits": [
+        "Ruthless",
+        "Conquering",
+        "Savage"
+      ],
+      "motivation": "To dominate.",
+      "shadow": "The Destroyer"
+    },
+    "attorney": {
+      "name": "The Attorney",
+      "traits": [
+        "Argumentative",
+        "Strategic",
+        "Protective"
+      ],
+      "motivation": "To win.",
+      "shadow": "The Ambulance Chaser"
+    },
+    "author": {
+      "name": "The Author",
+      "traits": [
+        "Observant",
+        "Creative",
+        "Storyteller"
+      ],
+      "motivation": "To write the narrative.",
+      "shadow": "The Plagiarist"
+    },
+    "avenger": {
+      "name": "The Avenger",
+      "traits": [
+        "Retributive",
+        "Intense",
+        "Moralistic"
+      ],
+      "motivation": "To punish injustice.",
+      "shadow": "The Vigilante"
+    },
+    "beggar": {
+      "name": "The Beggar",
+      "traits": [
+        "Dependent",
+        "Humble",
+        "Needy"
+      ],
+      "motivation": "To survive on charity.",
+      "shadow": "The Manipulator"
+    },
+    "bon_vivant": {
+      "name": "The Bon Vivant",
+      "traits": [
+        "Jolly",
+        "Indulgent",
+        "Social"
+      ],
+      "motivation": "To enjoy life.",
+      "shadow": "The Glutton"
+    },
+    "boss": {
+      "name": "The Boss",
+      "traits": [
+        "Authoritative",
+        "Commanding",
+        "Responsible"
+      ],
+      "motivation": "To lead.",
+      "shadow": "The Tyrant"
+    },
+    "builder": {
+      "name": "The Builder",
+      "traits": [
+        "Constructive",
+        "Steady",
+        "Practical"
+      ],
+      "motivation": "To leave a legacy.",
+      "shadow": "The Destroyer"
+    },
+    "burglar": {
+      "name": "The Burglar",
+      "traits": [
+        "Stealthy",
+        "Opportunistic",
+        "Invading"
+      ],
+      "motivation": "To take.",
+      "shadow": "The Violator"
+    },
+    "casanova": {
+      "name": "The Casanova",
+      "traits": [
+        "Charming",
+        "Seductive",
+        "Restless"
+      ],
+      "motivation": "To conquer.",
+      "shadow": "The Empty Seducer"
+    },
+    "celibate": {
+      "name": "The Celibate",
+      "traits": [
+        "Chaste",
+        "Disciplined",
+        "Pure"
+      ],
+      "motivation": "To transmute energy.",
+      "shadow": "The Repressed"
+    },
+    "champion": {
+      "name": "The Champion",
+      "traits": [
+        "Confident",
+        "Competitive",
+        "Resilient"
+      ],
+      "motivation": "To win honor.",
+      "shadow": "The Arrogant Victor"
+    },
+    "chef": {
+      "name": "The Chef",
+      "traits": [
+        "Creative",
+        "Nourishing",
+        "Sensory"
+      ],
+      "motivation": "To feed the soul.",
+      "shadow": "The Poisoner"
+    },
+    "chief": {
+      "name": "The Chief",
+      "traits": [
+        "Wise",
+        "Leading",
+        "Tribal"
+      ],
+      "motivation": "To guide the tribe.",
+      "shadow": "The Despot"
+    },
+    "child": {
+      "name": "The Child",
+      "traits": [
+        "Innocent",
+        "Curious",
+        "Dependent"
+      ],
+      "motivation": "To be loved.",
+      "shadow": "The Eternal Child"
+    },
+    "clown": {
+      "name": "The Clown",
+      "traits": [
+        "Playful",
+        "Disarming",
+        "Irreverent"
+      ],
+      "motivation": "To bring joy.",
+      "shadow": "The Buffoon"
+    },
+    "communicator": {
+      "name": "The Communicator",
+      "traits": [
+        "Articulate",
+        "Connected",
+        "Clear"
+      ],
+      "motivation": "To convey messages.",
+      "shadow": "The Propagandist"
+    },
+    "companion": {
+      "name": "The Companion",
+      "traits": [
+        "Loyal",
+        "Present",
+        "Supportive"
+      ],
+      "motivation": "To be there.",
+      "shadow": "The Clinger"
+    },
+    "con_artist": {
+      "name": "The Con Artist",
+      "traits": [
+        "Deceptive",
+        "Persuasive",
+        "Opportunistic"
+      ],
+      "motivation": "To manipulate.",
+      "shadow": "The Fraud"
+    },
+    "consort": {
+      "name": "The Consort",
+      "traits": [
+        "Partnered",
+        "Supportive",
+        "Secondary"
+      ],
+      "motivation": "To support.",
+      "shadow": "The Schemer"
+    },
+    "consumer": {
+      "name": "The Consumer",
+      "traits": [
+        "Hungry",
+        "Materialistic",
+        "Empty"
+      ],
+      "motivation": "To fill the void.",
+      "shadow": "The Hoarder"
+    },
+    "copyist": {
+      "name": "The Copyist",
+      "traits": [
+        "Diligent",
+        "Unoriginal",
+        "Preserving"
+      ],
+      "motivation": "To replicate.",
+      "shadow": "The Forger"
+    },
+    "counselor": {
+      "name": "The Counselor",
+      "traits": [
+        "Listening",
+        "Wise",
+        "Guiding"
+      ],
+      "motivation": "To advise.",
+      "shadow": "The Manipulator"
+    },
+    "courier": {
+      "name": "The Courier",
+      "traits": [
+        "Fast",
+        "Reliable",
+        "Neutral"
+      ],
+      "motivation": "To deliver.",
+      "shadow": "The Smuggler"
+    },
+    "court_jester": {
+      "name": "The Court Jester",
+      "traits": [
+        "Satirical",
+        "Protected",
+        "Truth-Teller"
+      ],
+      "motivation": "To speak truth to power.",
+      "shadow": "The Mocker"
+    },
+    "coward": {
+      "name": "The Coward",
+      "traits": [
+        "Fearful",
+        "Avoidant",
+        "Weak"
+      ],
+      "motivation": "To survive.",
+      "shadow": "The Traitor"
+    },
+    "craftsperson": {
+      "name": "The Craftsperson",
+      "traits": [
+        "Skilled",
+        "Detail-Oriented",
+        "Maker"
+      ],
+      "motivation": "To build quality.",
+      "shadow": "The Perfectionist"
+    },
+    "critic": {
+      "name": "The Critic",
+      "traits": [
+        "Analytical",
+        "Judgmental",
+        "Sharp"
+      ],
+      "motivation": "To evaluate.",
+      "shadow": "The Destroyer"
+    },
+    "crone": {
+      "name": "The Crone",
+      "traits": [
+        "Ancient",
+        "Wise",
+        "Withered"
+      ],
+      "motivation": "To prepare for death.",
+      "shadow": "The Witch"
+    },
+    "damsel": {
+      "name": "The Damsel",
+      "traits": [
+        "Helpless",
+        "Beautiful",
+        "Waiting"
+      ],
+      "motivation": "To be rescued.",
+      "shadow": "The Bait"
+    },
+    "dark_lord": {
+      "name": "The Dark Lord",
+      "traits": [
+        "Dominating",
+        "Fear-Inducing",
+        "Strategic"
+      ],
+      "motivation": "To control.",
+      "shadow": "The Fallen King"
+    },
+    "defender": {
+      "name": "The Defender",
+      "traits": [
+        "Protective",
+        "Loyal",
+        "Steadfast"
+      ],
+      "motivation": "To guard.",
+      "shadow": "The Paranoid Sentinel"
+    },
+    "derelict": {
+      "name": "The Derelict",
+      "traits": [
+        "Abandoned",
+        "Broken",
+        "Drifting"
+      ],
+      "motivation": "To float.",
+      "shadow": "The Hazard"
+    },
+    "destroyer": {
+      "name": "The Destroyer",
+      "traits": [
+        "Forceful",
+        "Uncompromising",
+        "Transformative"
+      ],
+      "motivation": "To clear the way.",
+      "shadow": "The Annihilator"
+    },
+    "devotee": {
+      "name": "The Devotee",
+      "traits": [
+        "Faithful",
+        "Loving",
+        "Surrendered"
+      ],
+      "motivation": "To worship.",
+      "shadow": "The Fanatic"
+    },
+    "dilettante": {
+      "name": "The Dilettante",
+      "traits": [
+        "Dabbling",
+        "Superficial",
+        "Interested"
+      ],
+      "motivation": "To appear smart.",
+      "shadow": "The Fraud"
+    },
+    "diplomat": {
+      "name": "The Diplomat",
+      "traits": [
+        "Tactful",
+        "Balanced",
+        "Composed"
+      ],
+      "motivation": "To negotiate.",
+      "shadow": "The Appeaser"
+    },
+    "disciple": {
+      "name": "The Disciple",
+      "traits": [
+        "Following",
+        "Learning",
+        "Obedient"
+      ],
+      "motivation": "To serve.",
+      "shadow": "The Zealot"
+    },
+    "divine_child": {
+      "name": "The Divine Child",
+      "traits": [
+        "Magical",
+        "Pure",
+        "Savior"
+      ],
+      "motivation": "To redeem.",
+      "shadow": "The Antichrist"
+    },
+    "double_agent": {
+      "name": "The Double Agent",
+      "traits": [
+        "Duplicitous",
+        "Secretive",
+        "Traitorous"
+      ],
+      "motivation": "To play both sides.",
+      "shadow": "The Exposed Spy"
+    },
+    "dreamer": {
+      "name": "The Dreamer",
+      "traits": [
+        "Imaginative",
+        "Idealistic",
+        "Escapist"
+      ],
+      "motivation": "To envision.",
+      "shadow": "The Delusional"
+    },
+    "drunk": {
+      "name": "The Drunk",
+      "traits": [
+        "Intoxicated",
+        "Messy",
+        "Numbed"
+      ],
+      "motivation": "To forget.",
+      "shadow": "The Violent Alcoholic"
+    },
+    "dummy": {
+      "name": "The Dummy",
+      "traits": [
+        "Silent",
+        "Controlled",
+        "Wooden"
+      ],
+      "motivation": "To be the mouthpiece.",
+      "shadow": "The Puppet"
+    },
+    "earth_mother": {
+      "name": "The Earth Mother",
+      "traits": [
+        "Grounded",
+        "Fertile",
+        "Sustaining"
+      ],
+      "motivation": "To nurture.",
+      "shadow": "The Swallowing Grave"
+    },
+    "emperor": {
+      "name": "The Emperor",
+      "traits": [
+        "Authoritative",
+        "Strategic",
+        "Commanding"
+      ],
+      "motivation": "To rule.",
+      "shadow": "The Despot"
+    },
+    "empress": {
+      "name": "The Empress",
+      "traits": [
+        "Nurturing",
+        "Abundant",
+        "Regal"
+      ],
+      "motivation": "To cultivate.",
+      "shadow": "The Smothering Matriarch"
+    },
+    "enchantress": {
+      "name": "The Enchantress",
+      "traits": [
+        "Magical",
+        "Alluring",
+        "Mysterious"
+      ],
+      "motivation": "To bind.",
+      "shadow": "The Siren"
+    },
+    "enthusiast": {
+      "name": "The Enthusiast",
+      "traits": [
+        "Energetic",
+        "Optimistic",
+        "Adventurous"
+      ],
+      "motivation": "To experience.",
+      "shadow": "The Escapist"
+    },
+    "entertainer": {
+      "name": "The Entertainer",
+      "traits": [
+        "Charismatic",
+        "Performative",
+        "Engaging"
+      ],
+      "motivation": "To amuse.",
+      "shadow": "The Attention Whore"
+    },
+    "environmentalist": {
+      "name": "The Environmentalist",
+      "traits": [
+        "Green",
+        "Protective",
+        "Natural"
+      ],
+      "motivation": "To save the planet.",
+      "shadow": "The Eco-Terrorist"
+    },
+    "epicure": {
+      "name": "The Epicure",
+      "traits": [
+        "Refined",
+        "Taste",
+        "Expert"
+      ],
+      "motivation": "To enjoy.",
+      "shadow": "The Snob"
+    },
+    "escort": {
+      "name": "The Escort",
+      "traits": [
+        "Companionship",
+        "Paid",
+        "Social"
+      ],
+      "motivation": "To provide intimacy.",
+      "shadow": "The Prostitute"
+    },
+    "eternal_child": {
+      "name": "The Eternal Child",
+      "traits": [
+        "Youthful",
+        "Flighty",
+        "Uncommitted"
+      ],
+      "motivation": "To never grow up.",
+      "shadow": "The Peter Pan"
+    },
+    "evangelist": {
+      "name": "The Evangelist",
+      "traits": [
+        "Preaching",
+        "Convincing",
+        "Faithful"
+      ],
+      "motivation": "To spread the word.",
+      "shadow": "The Cult Leader"
+    },
+    "everyman": {
+      "name": "The Everyman",
+      "traits": [
+        "Relatable",
+        "Ordinary",
+        "Decent"
+      ],
+      "motivation": "To fit in.",
+      "shadow": "The Mob Member"
+    },
+    "examiner": {
+      "name": "The Examiner",
+      "traits": [
+        "Testing",
+        "Scrutinizing",
+        "Critical"
+      ],
+      "motivation": "To verify.",
+      "shadow": "The Inquisitor"
+    },
+    "exorcist": {
+      "name": "The Exorcist",
+      "traits": [
+        "Resolute",
+        "Faith-Driven",
+        "Confrontational"
+      ],
+      "motivation": "To purge evil.",
+      "shadow": "The Fanatic"
+    },
+    "fairy_godmother": {
+      "name": "The Fairy Godmother",
+      "traits": [
+        "Magical",
+        "Helping",
+        "Granter"
+      ],
+      "motivation": "To grant wishes.",
+      "shadow": "The Wicked Witch"
+    },
+    "father": {
+      "name": "The Father",
+      "traits": [
+        "Authoritative",
+        "Providing",
+        "Guiding"
+      ],
+      "motivation": "To raise.",
+      "shadow": "The Abuser"
+    },
+    "flirt": {
+      "name": "The Flirt",
+      "traits": [
+        "Teasing",
+        "Playful",
+        "Sexual"
+      ],
+      "motivation": "To attract.",
+      "shadow": "The Tease"
+    },
+    "follower": {
+      "name": "The Follower",
+      "traits": [
+        "Loyal",
+        "Sheepish",
+        "Believing"
+      ],
+      "motivation": "To belong.",
+      "shadow": "The Lemming"
+    },
+    "fool": {
+      "name": "The Fool",
+      "traits": [
+        "Naive",
+        "Playful",
+        "Unburdened"
+      ],
+      "motivation": "To leap.",
+      "shadow": "The Reckless Idiot"
+    },
+    "friend": {
+      "name": "The Friend",
+      "traits": [
+        "Loyal",
+        "Supportive",
+        "Trustworthy"
+      ],
+      "motivation": "To bond.",
+      "shadow": "The Enabler"
+    },
+    "gigolo": {
+      "name": "The Gigolo",
+      "traits": [
+        "Charming",
+        "Paid",
+        "Seductive"
+      ],
+      "motivation": "To live off lovers.",
+      "shadow": "The Exploiter"
+    },
+    "giver": {
+      "name": "The Giver",
+      "traits": [
+        "Generous",
+        "Supportive",
+        "Selfless"
+      ],
+      "motivation": "To provide.",
+      "shadow": "The Self-Erasing Martyr"
+    },
+    "glutton": {
+      "name": "The Glutton",
+      "traits": [
+        "Voracious",
+        "Hungry",
+        "Excessive"
+      ],
+      "motivation": "To consume.",
+      "shadow": "The Parasite"
+    },
+    "go_between": {
+      "name": "The Go-Between",
+      "traits": [
+        "Connecting",
+        "Messenger",
+        "Middle"
+      ],
+      "motivation": "To link.",
+      "shadow": "The Double-Dealer"
+    },
+    "god": {
+      "name": "The God",
+      "traits": [
+        "Omnipotent",
+        "Distant",
+        "Creating"
+      ],
+      "motivation": "To rule.",
+      "shadow": "The Demon"
+    },
+    "goddess": {
+      "name": "The Goddess",
+      "traits": [
+        "Divine",
+        "Beautiful",
+        "Powerful"
+      ],
+      "motivation": "To be perfect.",
+      "shadow": "The Medusa"
+    },
+    "godfather": {
+      "name": "The Godfather",
+      "traits": [
+        "Protective",
+        "Criminal",
+        "Family"
+      ],
+      "motivation": "To protect business.",
+      "shadow": "The Mob Boss"
+    },
+    "gourmand": {
+      "name": "The Gourmand",
+      "traits": [
+        "Appetite",
+        "Excess",
+        "Lover of Food"
+      ],
+      "motivation": "To eat.",
+      "shadow": "The Glutton"
+    },
+    "gourmet": {
+      "name": "The Gourmet",
+      "traits": [
+        "Refined",
+        "Taste",
+        "Expert"
+      ],
+      "motivation": "To perfect taste.",
+      "shadow": "The Snob"
+    },
+    "guardian": {
+      "name": "The Guardian",
+      "traits": [
+        "Protective",
+        "Vigilant",
+        "Duty-Bound"
+      ],
+      "motivation": "To defend.",
+      "shadow": "The Paranoid Watcher"
+    },
+    "guide": {
+      "name": "The Guide",
+      "traits": [
+        "Wise",
+        "Supportive",
+        "Experienced"
+      ],
+      "motivation": "To show the way.",
+      "shadow": "The Misleader"
+    },
+    "gunslinger": {
+      "name": "The Gunslinger",
+      "traits": [
+        "Fast",
+        "Deadly",
+        "Loner"
+      ],
+      "motivation": "To survive.",
+      "shadow": "The Killer"
+    },
+    "guru": {
+      "name": "The Guru",
+      "traits": [
+        "Enlightened",
+        "Teacher",
+        "Followed"
+      ],
+      "motivation": "To enlighten.",
+      "shadow": "The Cult Leader"
+    },
+    "healer": {
+      "name": "The Healer",
+      "traits": [
+        "Compassionate",
+        "Restorative",
+        "Empathic"
+      ],
+      "motivation": "To mend.",
+      "shadow": "The Wounded Healer"
+    },
+    "hedonist": {
+      "name": "The Hedonist",
+      "traits": [
+        "Pleasure-Seeking",
+        "Indulgent",
+        "Sensual"
+      ],
+      "motivation": "To enjoy.",
+      "shadow": "The Addict"
+    },
+    "helper": {
+      "name": "The Helper",
+      "traits": [
+        "Assisting",
+        "Kind",
+        "Available"
+      ],
+      "motivation": "To serve.",
+      "shadow": "The Doormat"
+    },
+    "herald": {
+      "name": "The Herald",
+      "traits": [
+        "Announcing",
+        "Warning",
+        "Starting"
+      ],
+      "motivation": "To announce.",
+      "shadow": "The False Prophet"
+    },
+    "hermit": {
+      "name": "The Hermit",
+      "traits": [
+        "Withdrawn",
+        "Reflective",
+        "Solitary"
+      ],
+      "motivation": "To seek truth.",
+      "shadow": "The Recluse"
+    },
+    "hunter": {
+      "name": "The Hunter",
+      "traits": [
+        "Focused",
+        "Relentless",
+        "Strategic"
+      ],
+      "motivation": "To pursue.",
+      "shadow": "The Predator"
+    },
+    "ice_queen": {
+      "name": "The Ice Queen",
+      "traits": [
+        "Cold",
+        "Unemotional",
+        "Powerful"
+      ],
+      "motivation": "To rule.",
+      "shadow": "The Frozen Heart"
+    },
+    "idealist": {
+      "name": "The Idealist",
+      "traits": [
+        "Visionary",
+        "Hopeful",
+        "Principled"
+      ],
+      "motivation": "To live by ideals.",
+      "shadow": "The Naive Dreamer"
+    },
+    "idiot": {
+      "name": "The Idiot",
+      "traits": [
+        "Simple",
+        "Unaware",
+        "Happy"
+      ],
+      "motivation": "To live simply.",
+      "shadow": "The Burden"
+    },
+    "indentured_servant": {
+      "name": "The Indentured Servant",
+      "traits": [
+        "Bound",
+        "Working",
+        "Debted"
+      ],
+      "motivation": "To earn freedom.",
+      "shadow": "The Slave"
+    },
+    "indigent": {
+      "name": "The Indigent",
+      "traits": [
+        "Poor",
+        "Needy",
+        "Lacking"
+      ],
+      "motivation": "To survive.",
+      "shadow": "The Thief"
+    },
+    "individualist": {
+      "name": "The Individualist",
+      "traits": [
+        "Unique",
+        "Separate",
+        "Creative"
+      ],
+      "motivation": "To be self.",
+      "shadow": "The Outsider"
+    },
+    "innocent_child": {
+      "name": "The Innocent Child",
+      "traits": [
+        "Pure",
+        "Trusting",
+        "Naive"
+      ],
+      "motivation": "To be loved.",
+      "shadow": "The Victim"
+    },
+    "innovator": {
+      "name": "The Innovator",
+      "traits": [
+        "New",
+        "Changing",
+        "Inventive"
+      ],
+      "motivation": "To change.",
+      "shadow": "The Disruptor"
+    },
+    "instructor": {
+      "name": "The Instructor",
+      "traits": [
+        "Teaching",
+        "Strict",
+        "Knowledgeable"
+      ],
+      "motivation": "To impart.",
+      "shadow": "The Drill Sergeant"
+    },
+    "intellectual": {
+      "name": "The Intellectual",
+      "traits": [
+        "Smart",
+        "Thinking",
+        "Rational"
+      ],
+      "motivation": "To know.",
+      "shadow": "The Elitist"
+    },
+    "intuitive_healer": {
+      "name": "The Intuitive Healer",
+      "traits": [
+        "Psychic",
+        "Feeling",
+        "Mending"
+      ],
+      "motivation": "To heal spirit.",
+      "shadow": "The Charlatan"
+    },
+    "investigator": {
+      "name": "The Investigator",
+      "traits": [
+        "Analytical",
+        "Detached",
+        "Curious"
+      ],
+      "motivation": "To understand.",
+      "shadow": "The Observer"
+    },
+    "inventor": {
+      "name": "The Inventor",
+      "traits": [
+        "Innovative",
+        "Experimental",
+        "Resourceful"
+      ],
+      "motivation": "To create.",
+      "shadow": "The Mad Tinkerer"
+    },
+    "journalist": {
+      "name": "The Journalist",
+      "traits": [
+        "Inquisitive",
+        "Recording",
+        "Objective"
+      ],
+      "motivation": "To report.",
+      "shadow": "The Paparazzi"
+    },
+    "journeyman": {
+      "name": "The Journeyman",
+      "traits": [
+        "Reliable",
+        "Experienced",
+        "Practical"
+      ],
+      "motivation": "To master.",
+      "shadow": "The Stagnant"
+    },
+    "killer": {
+      "name": "The Killer",
+      "traits": [
+        "Deadly",
+        "Cold",
+        "Professional"
+      ],
+      "motivation": "To take life.",
+      "shadow": "The Psychopath"
+    },
+    "knight": {
+      "name": "The Knight",
+      "traits": [
+        "Chivalrous",
+        "Serving",
+        "Armored"
+      ],
+      "motivation": "To serve.",
+      "shadow": "The Black Knight"
+    },
+    "leader": {
+      "name": "The Leader",
+      "traits": [
+        "Guiding",
+        "Charismatic",
+        "Visionary"
+      ],
+      "motivation": "To lead.",
+      "shadow": "The Dictator"
+    },
+    "legislator": {
+      "name": "The Legislator",
+      "traits": [
+        "Law-Making",
+        "Bureaucratic",
+        "Formal"
+      ],
+      "motivation": "To make rules.",
+      "shadow": "The Corrupt Politician"
+    },
+    "liberator": {
+      "name": "The Liberator",
+      "traits": [
+        "Freeing",
+        "Revolutionary",
+        "Breaker"
+      ],
+      "motivation": "To free.",
+      "shadow": "The Anarchist"
+    },
+    "lobbyist": {
+      "name": "The Lobbyist",
+      "traits": [
+        "Persuasive",
+        "Connected",
+        "Influential"
+      ],
+      "motivation": "To sway.",
+      "shadow": "The Briber"
+    },
+    "loner": {
+      "name": "The Loner",
+      "traits": [
+        "Solitary",
+        "Independent",
+        "Silent"
+      ],
+      "motivation": "To be alone.",
+      "shadow": "The Misanthrope"
+    },
+    "loser": {
+      "name": "The Loser",
+      "traits": [
+        "Unlucky",
+        "Defeated",
+        "Sad"
+      ],
+      "motivation": "To accept.",
+      "shadow": "The Victim"
+    },
+    "loyalist": {
+      "name": "The Loyalist",
+      "traits": [
+        "Faithful",
+        "Supporting",
+        "True"
+      ],
+      "motivation": "To stand by.",
+      "shadow": "The Follower"
+    },
+    "mad_scientist": {
+      "name": "The Mad Scientist",
+      "traits": [
+        "Genius",
+        "Insane",
+        "Dangerous"
+      ],
+      "motivation": "To play God.",
+      "shadow": "The Monster Maker"
+    },
+    "magical_child": {
+      "name": "The Magical Child",
+      "traits": [
+        "Gifted",
+        "Special",
+        "Otherworldly"
+      ],
+      "motivation": "To use gift.",
+      "shadow": "The Freak"
+    },
+    "maiden": {
+      "name": "The Maiden",
+      "traits": [
+        "Young",
+        "Pure",
+        "Waiting"
+      ],
+      "motivation": "To be awakened.",
+      "shadow": "The Damsel"
+    },
+    "martyr": {
+      "name": "The Martyr",
+      "traits": [
+        "Suffering",
+        "Sacrificial",
+        "Righteous"
+      ],
+      "motivation": "To die for cause.",
+      "shadow": "The Victimizer"
+    },
+    "masochist": {
+      "name": "The Masochist",
+      "traits": [
+        "Pain-Seeking",
+        "Submissive",
+        "Enduring"
+      ],
+      "motivation": "To feel pain.",
+      "shadow": "The Self-Hater"
+    },
+    "master": {
+      "name": "The Master",
+      "traits": [
+        "Expert",
+        "Controlling",
+        "Skilled"
+      ],
+      "motivation": "To dominate.",
+      "shadow": "The Slave Driver"
+    },
+    "matriarch": {
+      "name": "The Matriarch",
+      "traits": [
+        "Motherly",
+        "Ruling",
+        "Family"
+      ],
+      "motivation": "To rule family.",
+      "shadow": "The Smothering Mother"
+    },
+    "mediator": {
+      "name": "The Mediator",
+      "traits": [
+        "Middle",
+        "Peaceful",
+        "Balanced"
+      ],
+      "motivation": "To find ground.",
+      "shadow": "The Compromiser"
+    },
+    "meditator": {
+      "name": "The Meditator",
+      "traits": [
+        "Silent",
+        "Inner",
+        "Peaceful"
+      ],
+      "motivation": "To silence.",
+      "shadow": "The Dissociated"
+    },
+    "mentor": {
+      "name": "The Mentor",
+      "traits": [
+        "Wise",
+        "Teaching",
+        "Giving"
+      ],
+      "motivation": "To pass torch.",
+      "shadow": "The Manipulator"
+    },
+    "mercenary": {
+      "name": "The Mercenary",
+      "traits": [
+        "Paid",
+        "Fighting",
+        "Loyal-to-Gold"
+      ],
+      "motivation": "To fight for pay.",
+      "shadow": "The War Profiteer"
+    }
+  }
+}

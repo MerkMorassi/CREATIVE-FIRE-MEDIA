@@ -1,0 +1,84 @@
+{
+  "comprehensive_feature_film": {
+    "name": "Comprehensive Feature Film (Three-Act)",
+    "description": "A 14-beat structure based on standard Hollywood screenwriting (Save the Cat variant), focusing on character transformation and visual storytelling.",
+    "development_questions": [
+        "What is the central conflict of the story?",
+        "What is the theme or message you want to convey?",
+        "Who is the protagonist and what is their goal?",
+        "Who or what is the antagonist?",
+        "What are the major plot points that drive the story forward?",
+        "What are the main obstacles the protagonist must overcome?",
+        "What is the resolution of the story?",
+        "What is at stake for the protagonist if they fail?",
+        "What is the protagonist's character flaw or weakness?"
+    ],
+    "scene_questions": [
+        "What is the goal or purpose of this scene?",
+        "What conflict or obstacle does the protagonist face in this scene?",
+        "How does this scene advance the plot or develop the characters?",
+        "What emotions or themes are explored in this scene?",
+        "How does this scene connect to previous and future scenes?",
+        "What is the central action or event of this scene?",
+        "How does this scene contribute to the overall tone or atmosphere?",
+        "What is the resolution or outcome of this scene?",
+        "How does this scene foreshadow or set up future events?",
+        "How does this scene reveal something new or unexpected?"
+    ],
+    "beats": [
+      {"label": "1. Opening Image", "instruction": "Introduce the protagonist and their ordinary world. A visual that represents the struggle & tone."},
+      {"label": "2. Theme Stated", "instruction": "What your story is about; the message, the truth. Usually spoken to the protagonist."},
+      {"label": "3. Catalyst", "instruction": "The event or incident that sets the story in motion. The 'before' world is no more."},
+      {"label": "4. Debate", "instruction": "The protagonist considers the situation and decides whether to act. Can I face this challenge?"},
+      {"label": "5. Break into Two", "instruction": "The protagonist commits to their goal and enters a new world. Leaving the thesis world."},
+      {"label": "6. B Story", "instruction": "Introduce the secondary plotline or love interest. Discusses the theme."},
+      {"label": "7. Fun and Games", "instruction": "The promise of the premise. The protagonist enjoys some initial success."},
+      {"label": "8. Midpoint", "instruction": "A twist or revelation raises the stakes. Everything is 'great' or 'awful'."},
+      {"label": "9. Bad Guys Close In", "instruction": "The antagonist gains the upper hand and puts pressure on the protagonist."},
+      {"label": "10. All is Lost", "instruction": "The protagonist suffers a major setback. Something or someone dies (literal or metaphorical)."},
+      {"label": "11. Dark Night of the Soul", "instruction": "The protagonist confronts their character flaw and questions their ability to succeed."},
+      {"label": "12. Break into Three", "instruction": "The protagonist regains their focus and commits to a new plan (Synthesis)."},
+      {"label": "13. Finale", "instruction": "The protagonist faces the antagonist in a final showdown."},
+      {"label": "14. Final Image", "instruction": "The story concludes with a final image that mirrors the opening image, showing change."}
+    ]
+  },
+  "vogler_12": {
+    "name": "Vogler's Hero's Journey",
+    "beats": [
+      {"label": "1. Ordinary World", "instruction": "Establish the Status Quo. Show the hero's lack or flaw."},
+      {"label": "2. Call to Adventure", "instruction": "The Inciting Incident. A disruption to the Ordinary World."},
+      {"label": "3. Refusal of Call", "instruction": "The Hero hesitates due to fear or insecurity."},
+      {"label": "4. Mentor", "instruction": "The Hero meets a guide who provides tools or wisdom."},
+      {"label": "5. Crossing Threshold", "instruction": "The Point of No Return. Entering the Special World."},
+      {"label": "6. Tests, Allies, Enemies", "instruction": "Exploring the new world, learning rules, meeting the team."},
+      {"label": "7. Approach", "instruction": "Preparation for the main crisis. Deepening relationships."},
+      {"label": "8. Ordeal", "instruction": "The central crisis. Death and Rebirth. Facing the greatest fear."},
+      {"label": "9. Reward", "instruction": "Seizing the Sword. The Hero gains the object of their quest."},
+      {"label": "10. Road Back", "instruction": "The consequences of the Act. The chase/escape."},
+      {"label": "11. Resurrection", "instruction": "The Final Exam. The Hero proves they have changed."},
+      {"label": "12. Return", "instruction": "Returning home with the Elixir to heal the Ordinary World."}
+    ]
+  },
+  "freytag_pyramid": {
+    "name": "Freytag's Pyramid (Tragedy)",
+    "beats": [
+      {"label": "1. Introduction", "instruction": "Establish characters and setting."},
+      {"label": "2. Rising Action", "instruction": "Conflict is introduced and tension builds."},
+      {"label": "3. Climax", "instruction": "The turning point. The point of highest tension."},
+      {"label": "4. Falling Action", "instruction": "The conflict unravels, leading towards the inevitable."},
+      {"label": "5. Catastrophe", "instruction": "The tragic conclusion. The hero's failure or demise."}
+    ]
+  },
+  "seven_point": {
+    "name": "Seven-Point Structure",
+    "beats": [
+      {"label": "1. The Hook", "instruction": "The starting state. Opposite of the ending."},
+      {"label": "2. Plot Point 1", "instruction": "The Call to Adventure. Life changes."},
+      {"label": "3. Pinch Point 1", "instruction": "Pressure is applied. The antagonist strikes."},
+      {"label": "4. Midpoint", "instruction": "The hero shifts from reactive to active."},
+      {"label": "5. Pinch Point 2", "instruction": "The jaws of defeat. All hope seems lost."},
+      {"label": "6. Plot Point 2", "instruction": "The solution is found. The hero has the key."},
+      {"label": "7. Resolution", "instruction": "The conflict is resolved. The new normal."}
+    ]
+  }
+}

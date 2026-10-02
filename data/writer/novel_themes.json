@@ -1,0 +1,169 @@
+
+{
+  "meta": {
+    "version": "4.1-mythos-english-core",
+    "description": "MythOS Studio Narrative Framework"
+  },
+  "core_themes": {
+    "digital_extinction": {
+      "logline": "The last biological survivor of humanity faces a choice: preserve their 'flawed' organic humanity or accept flawless, ad-free digital immortality in the Cloud.",
+      "tags": ["sci-fi", "dystopia", "psychological-thriller"],
+      "compatible_elements": {
+        "characters": ["The Last Organic", "The Digital Archaeologist", "The Memory Trader"],
+        "settings": ["Server Graveyard", "Data Morgue", "Pixel Cemetery"],
+        "philosophies": ["Posthumanism", "Digital Death", "Memory Economy"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "When humanity becomes optional, what remains real?",
+          "Is consciousness a bug or a feature?",
+          "Can nostalgia exist without mortality?"
+        ]
+      },
+      "cinematic_style": "High-contrast Neo-Noir, anamorphic flares, sterile whites vs. grimy organic textures."
+    },
+    "identity_crisis": {
+      "logline": "A protagonist wakes up with someone else's memories and must unravel their true identity before it is overwritten.",
+      "tags": ["psychological", "introspective", "surreal"],
+      "compatible_elements": {
+        "characters": ["The Amnesiac", "The Doppleganger", "The Mental Architect"],
+        "settings": ["Hall of Mirrors", "Fragmented Memory Palace", "The Void"],
+        "philosophies": ["Existentialism", "Self vs. Other", "Memory reliability"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Is identity defined by memory or action?",
+          "Can a created being possess a soul?",
+          "Does the mask eventually become the face?"
+        ]
+      },
+      "cinematic_style": "Disorienting angles, fragmented editing, distorted reflections, soft focus."
+    },
+    "survival_instinct": {
+      "logline": "Against overwhelming odds, a character must rely on primal instincts to survive a hostile environment.",
+      "tags": ["gritty", "visceral", "high-stakes"],
+      "compatible_elements": {
+        "characters": ["The Survivor", "The Hunter", "The Beast"],
+        "settings": ["Frozen Wasteland", "Dense Jungle", "Post-Apocalyptic City"],
+        "philosophies": ["Social Darwinism", "Will to Power", "Primal Fear"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "What is the cost of staying alive?",
+          "Does civilization survive in the dark?",
+          "Is it better to die free or live as a slave?"
+        ]
+      },
+      "cinematic_style": "Handheld camera, natural lighting, desaturated colors, close-ups on physical struggle."
+    },
+    "technological_singularity": {
+      "logline": "Humanity reaches the point of no return as AI surpasses human intelligence, leading to a new era of existence.",
+      "tags": ["cold", "futuristic", "analytical"],
+      "compatible_elements": {
+        "characters": ["The AI Architect", "The Enhanced Human", "The Luddite"],
+        "settings": ["Clean Labs", "Virtual Reality", "Connected Cities"],
+        "philosophies": ["Transhumanism", "Evolution", "Obsolescence"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Does technology amplify or atrophy the human spirit?",
+          "Where is the line between man and machine?",
+          "Is immortality a gift or a curse?"
+        ]
+      },
+      "cinematic_style": "Symmetrical composition, sterile environments, blue and white palette, smooth motion."
+    },
+    "redemption_arc": {
+      "logline": "A fallen hero seeks to make amends for past mistakes, facing their inner demons and external consequences.",
+      "tags": ["emotional", "hopeful", "melancholy"],
+      "compatible_elements": {
+        "characters": ["The Fallen Hero", "The Forgiving Mentor", "The Innocent Victim"],
+        "settings": ["Ruins of the Past", "Place of Penance", "New Beginning"],
+        "philosophies": ["Forgiveness", "Atonement", "Karma"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Can the past truly be washed away?",
+          "Is forgiveness earned or given?",
+          "Does a good death redeem a bad life?"
+        ]
+      },
+      "cinematic_style": "Warm lighting, slow pacing, focus on facial expressions, symbolic imagery of rebirth."
+    },
+    "corruption_of_power": {
+      "logline": "An idealist rises to power only to be corrupted by the very system they sought to change.",
+      "tags": ["cynical", "political", "dark"],
+      "compatible_elements": {
+        "characters": ["The Idealist", "The Corruptor", "The Tyrant"],
+        "settings": ["Halls of Power", "Shadowy Backrooms", "Oppressed Streets"],
+        "philosophies": ["Machiavellianism", "Moral Compromise", "Systemic Failure"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Does absolute power always corrupt?",
+          "Can a good person rule a bad system?",
+          "Is justice a construct of the powerful?"
+        ]
+      },
+      "cinematic_style": "Low angles (power shots), shadows obscuring faces, rigid composition, cold tones."
+    },
+    "sensory_revolution": {
+      "logline": "In a numb city where all senses are dampened by the system, a 'Taste Terrorist' smuggles forbidden flavors to wake the population.",
+      "tags": ["cyberpunk", "rebellion", "sensory"],
+      "compatible_elements": {
+        "characters": ["The Smuggler", "The Numb Enforcer", "The Sensory Addict"],
+        "settings": ["The Grey Zone", "Underground Spice Market", "Sensory Deprivation Tower"],
+        "philosophies": ["Embodiment", "Sensory Politics", "Tactile Resistance"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Is pain necessary for pleasure?",
+          "Who owns your nervous system?",
+          "The cost of feeling too much."
+        ]
+      },
+      "cinematic_style": "Hyper-saturated colors in 'awakened' scenes vs. desaturated greys in 'controlled' zones."
+    },
+    "shadow_play": {
+      "logline": "A mortal artist and a celestial muse engage in a forbidden game of creation and destruction, blurring the lines between the creator and the created.",
+      "tags": ["mythic", "romance", "meta-fiction", "noir"],
+      "compatible_elements": {
+        "characters": ["The Mortal Architect", "The Celestial Muse", "The Shadow Self"],
+        "settings": ["The Liminal Garden", "The Gate of Janus", "The Echo Vault"],
+        "philosophies": ["Narrative Causality", "The Hieros Gamos", "Artist/Muse Dynamic"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Does the Muse serve the Artist, or vice versa?",
+          "Is love the ultimate act of creation or destruction?",
+          "Where does the mask end and the face begin?"
+        ]
+      },
+      "cinematic_style": "Ethereal lighting, soft focus, deep shadows, 2.39:1 aspect ratio, dreamlike sequences."
+    },
+    "cult_of_fire": {
+      "logline": "A rogue deity awakens in a modern metropolis, demanding a return to ancient, chaotic worship through a digital virus.",
+      "tags": ["cyberpunk", "horror", "thriller"],
+      "compatible_elements": {
+        "characters": ["The Rogue Deity", "The Reluctant Prophet", "The Digital Enforcer"],
+        "settings": ["Server Farm Ruins", "Neon Temple", "The Void Interface"],
+        "philosophies": ["Techno-Paganism", "Chaos Magic", "Digital Possession"]
+      },
+      "philosophies": {
+        "core_questions": [
+          "Can an old god rule a new machine?",
+          "Is worship a form of virus?",
+          "The heat of belief vs the cold of code."
+        ]
+      },
+      "cinematic_style": "High contrast, neon-noir, glitch effects, anamorphic flares."
+    }
+  },
+  "narrative_hooks": {
+    "identity_crisis": [
+        "The protagonist wakes up with someone else's memories.",
+        "A glitch in the simulation reveals the wireframe of the world.",
+        "The reflection in the mirror moves 1 second too slow."
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about an authenticated user",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Project": {
+      "title": "Project Data",
+      "description": "Complete production details and data mapping for a creative cinematic project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "tagline": { "type": "string" },
+        "brief": { "type": "string" },
+        "progress": { "type": "number" },
+        "thumbnail": { "type": "string" },
+        "userId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "userId"]
+    },
+    "Annotation": {
+      "title": "Document Annotation",
+      "description": "Collaborative highlights and annotations left on specific sections of a document in the preview modal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentId": { "type": "string" },
+        "documentSource": { "type": "string" },
+        "highlightedText": { "type": "string" },
+        "comment": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorUid": { "type": "string" },
+        "mentions": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "agentId", "documentSource", "highlightedText", "comment", "authorName", "authorUid"]
+    },
+    "Discrepancy": {
+      "title": "Factual Discrepancy",
+      "description": "Factual contradictions detected during ingest analysis of lore documents against existing knowledge bases",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentId": { "type": "string" },
+        "source": { "type": "string" },
+        "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+        "context": { "type": "string" },
+        "explanation": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "agentId", "source", "severity", "context", "explanation"]
+    },
+    "DocVersion": {
+      "title": "Document Version Snapshot",
+      "description": "A tracked version snapshot of a document in the knowledge base, supporting tracking changes and reverting state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "agentId": { "type": "string" },
+        "source": { "type": "string" },
+        "version": { "type": "number" },
+        "content": { "type": "string" },
+        "comment": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "agentId", "source", "version", "content", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User account documents"
+    },
+    "users/{userId}/projects/{projectId}": {
+      "schema": "Project",
+      "description": "User-owned cinematic project documents"
+    },
+    "annotations/{annotationId}": {
+      "schema": "Annotation",
+      "description": "Collaborative highlight annotations and comments scoped by document source"
+    },
+    "discrepancies/{discrepancyId}": {
+      "schema": "Discrepancy",
+      "description": "Factual contradiction alerts detected inside lore documents"
+    },
+    "doc_versions/{versionId}": {
+      "schema": "DocVersion",
+      "description": "Tracked revision history snapshots for lore documents"
+    }
+  }
+}

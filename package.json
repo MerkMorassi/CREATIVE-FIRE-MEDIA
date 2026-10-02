@@ -1,0 +1,29 @@
+{
+  "name": "media-analysis-agent",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.34.0",
+    "@gradio/client": "^2.0.1",
+    "@huggingface/inference": "^4.13.5",
+    "@types/d3": "^7.4.3",
+    "d3": "^7.9.0",
+    "firebase": "^12.19.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

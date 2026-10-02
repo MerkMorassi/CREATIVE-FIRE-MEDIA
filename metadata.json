@@ -1,0 +1,10 @@
+{
+  "name": "MythOS Studio Pro",
+  "description": "High-fidelity cinematic production suite with LOREPACK neural synchronization.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

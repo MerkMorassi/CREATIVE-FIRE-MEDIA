@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net: default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Auth tokens do not contain custom claims; verify matches directly
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) 
+        && incoming().uid == request.auth.uid
+        && incoming().email is string
+        && incoming().email.size() <= 256;
+      allow update: if isOwner(userId)
+        && incoming().uid == existing().uid
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email']);
+      allow delete: if false;
+    }
+
+    // Projects Collection (Subcollection of users)
+    match /users/{userId}/projects/{projectId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) 
+        && isValidId(projectId)
+        && incoming().id == projectId
+        && incoming().userId == request.auth.uid
+        && incoming().name is string
+        && incoming().name.size() <= 200;
+      allow update: if isOwner(userId)
+        && incoming().id == existing().id
+        && incoming().userId == existing().userId
+        && incoming().name is string
+        && incoming().name.size() <= 200;
+      allow delete: if isOwner(userId);
+    }
+
+    // Standalone validation helper for annotations
+    function isValidAnnotation(data) {
+      return data.keys().hasAll(['id', 'agentId', 'documentSource', 'highlightedText', 'comment', 'authorName', 'authorUid'])
+        && data.keys().hasOnly(['id', 'agentId', 'documentSource', 'highlightedText', 'comment', 'authorName', 'authorUid', 'mentions', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.agentId is string && data.agentId.size() <= 128
+        && data.documentSource is string && data.documentSource.size() <= 512
+        && data.highlightedText is string && data.highlightedText.size() <= 2000
+        && data.comment is string && data.comment.size() <= 4000
+        && data.authorName is string && data.authorName.size() <= 256
+        && data.authorUid is string && data.authorUid.size() <= 128
+        && data.authorUid == request.auth.uid;
+    }
+
+    // Annotations Collection
+    match /annotations/{annotationId} {
+      allow list, get: if isSignedIn();
+      allow create: if isSignedIn() 
+        && isValidId(annotationId)
+        && incoming().id == annotationId
+        && isValidAnnotation(incoming());
+      allow update: if false; // Annotations are immutable once posted
+      allow delete: if isSignedIn() && existing().authorUid == request.auth.uid;
+    }
+
+    // Standalone validation helper for discrepancies
+    function isValidDiscrepancy(data) {
+      return data.keys().hasAll(['id', 'agentId', 'source', 'severity', 'context', 'explanation'])
+        && data.keys().hasOnly(['id', 'agentId', 'source', 'severity', 'context', 'explanation', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.agentId is string && data.agentId.size() <= 128
+        && data.source is string && data.source.size() <= 512
+        && data.severity is string && (data.severity == 'high' || data.severity == 'medium' || data.severity == 'low')
+        && data.context is string && data.context.size() <= 5000
+        && data.explanation is string && data.explanation.size() <= 5000;
+    }
+
+    // Discrepancies Collection
+    match /discrepancies/{discrepancyId} {
+      allow list, get: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidId(discrepancyId)
+        && incoming().id == discrepancyId
+        && isValidDiscrepancy(incoming());
+      allow update: if false;
+      allow delete: if isSignedIn();
+    }
+
+    // Standalone validation helper for document versions
+    function isValidDocVersion(data) {
+      return data.keys().hasAll(['id', 'agentId', 'source', 'version', 'content', 'timestamp'])
+        && data.keys().hasOnly(['id', 'agentId', 'source', 'version', 'content', 'timestamp', 'comment'])
+        && data.id is string && data.id.size() <= 128
+        && data.agentId is string && data.agentId.size() <= 128
+        && data.source is string && data.source.size() <= 512
+        && data.version is number
+        && data.content is string && data.content.size() <= 500000;
+    }
+
+    // Document Versions Collection
+    match /doc_versions/{versionId} {
+      allow list, get: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidId(versionId)
+        && incoming().id == versionId
+        && isValidDocVersion(incoming());
+      allow update: if false; // Document versions are append-only snapshots
+      allow delete: if isSignedIn();
+    }
+  }
+}
