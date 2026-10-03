@@ -1,7 +1,9 @@
 
-import React, { useState } from 'react';
-import { ActiveView, Project, ImageState } from '../types.ts';
+import React, { useState, useEffect } from 'react';
+import { ActiveView, Project, ImageState, AudioSentimentAnalysis } from '../types.ts';
 import { StoryboardIcon, CharacterIcon, LoreIcon, PinIcon, ShuffleIcon, GridIcon, LibraryIcon, DashboardIcon, EditIcon, CheckIcon, ScriptIcon, ImageIcon } from './icons.tsx';
+import { AudioThemesBubbleChart } from './AudioThemesBubbleChart.tsx';
+import { analyzeAudioSentimentAndThemesService } from '../services/geminiService.ts';
 
 interface DashboardStudioProps {
     project: Project;
@@ -56,7 +58,44 @@ export const DashboardStudio: React.FC<DashboardStudioProps> = ({ project, onUpd
     const [isEditingBrief, setIsEditingBrief] = useState(false);
     const [brief, setBrief] = useState(project.brief || '');
     const [progress, setProgress] = useState(project.progress || 0);
-    const [dashboardTab, setDashboardTab] = useState<'metrics' | 'timeline'>('metrics');
+    const [dashboardTab, setDashboardTab] = useState<'metrics' | 'timeline' | 'audio-themes'>('metrics');
+
+    // Audio Sentiment & Plot Themes State
+    const [audioAnalysis, setAudioAnalysis] = useState<AudioSentimentAnalysis | null>(null);
+    const [isLoadingAudioAnalysis, setIsLoadingAudioAnalysis] = useState<boolean>(false);
+
+    const fetchAudioAnalysis = async () => {
+        setIsLoadingAudioAnalysis(true);
+        try {
+            const data = await analyzeAudioSentimentAndThemesService(
+                project.data.transcripts || [],
+                project.name || "Cinematic Universe"
+            );
+            if (data && data.plotThemes) {
+                setAudioAnalysis(data);
+                try {
+                    localStorage.setItem(`mythos_audio_analysis_${project.id}`, JSON.stringify(data));
+                } catch (e) {}
+            }
+        } catch (err) {
+            console.error("Audio sentiment analysis failed:", err);
+        } finally {
+            setIsLoadingAudioAnalysis(false);
+        }
+    };
+
+    useEffect(() => {
+        try {
+            const cached = localStorage.getItem(`mythos_audio_analysis_${project.id}`);
+            if (cached) {
+                setAudioAnalysis(JSON.parse(cached));
+            } else {
+                fetchAudioAnalysis();
+            }
+        } catch (e) {
+            fetchAudioAnalysis();
+        }
+    }, [project.id]);
 
     // Custom milestone form states
     const [showAddMilestone, setShowAddMilestone] = useState(false);
@@ -378,7 +417,7 @@ export const DashboardStudio: React.FC<DashboardStudioProps> = ({ project, onUpd
                         <h2 className="text-xl font-black text-white uppercase tracking-tight">Studio Production Center</h2>
                     </div>
 
-                    <div className="flex bg-black/40 border border-neutral-800 p-1.5 rounded-xl self-end sm:self-auto shrink-0">
+                    <div className="flex bg-black/40 border border-neutral-800 p-1.5 rounded-xl self-end sm:self-auto shrink-0 flex-wrap gap-1">
                         <button
                             onClick={() => setDashboardTab('metrics')}
                             className={`px-4 py-1.5 text-[10px] uppercase tracking-wider font-black rounded-lg transition-all ${
@@ -388,6 +427,16 @@ export const DashboardStudio: React.FC<DashboardStudioProps> = ({ project, onUpd
                             }`}
                         >
                             📊 KPI Metrics
+                        </button>
+                        <button
+                            onClick={() => setDashboardTab('audio-themes')}
+                            className={`px-4 py-1.5 text-[10px] uppercase tracking-wider font-black rounded-lg transition-all flex items-center gap-1.5 ${
+                                dashboardTab === 'audio-themes' 
+                                    ? 'bg-purple-600 text-white shadow-md' 
+                                    : 'text-neutral-400 hover:text-neutral-200'
+                            }`}
+                        >
+                            🫧 Audio Sentiment & Plot Themes
                         </button>
                         <button
                             onClick={() => setDashboardTab('timeline')}
@@ -572,8 +621,20 @@ export const DashboardStudio: React.FC<DashboardStudioProps> = ({ project, onUpd
                             ))}
                         </div>
                     </div>
+                ) : dashboardTab === 'audio-themes' ? (
+                    /* Dedicated Audio Themes & Sentiment Intelligence Tab */
+                    <div className="space-y-6">
+                        <AudioThemesBubbleChart
+                            analysis={audioAnalysis}
+                            isLoading={isLoadingAudioAnalysis}
+                            onReanalyze={fetchAudioAnalysis}
+                            transcriptsCount={project.data.transcripts?.length || 4}
+                            onNavigateToLore={() => onNavigate('lore')}
+                        />
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="space-y-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {/* Column 1: Core Compute metrics */}
                         <div className="bg-neutral-950/40 border border-neutral-850 p-5 rounded-xl flex flex-col justify-between">
                             <div className="space-y-2">
@@ -697,6 +758,18 @@ export const DashboardStudio: React.FC<DashboardStudioProps> = ({ project, onUpd
                                     <span className="text-xs font-black font-mono">{stats.imagesGenerated > 8 ? "Overloaded" : stats.imagesGenerated > 0 ? "High Active" : "Idle"}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Interactive Audio Transcripts Plot Themes & Sentiment Bubble Chart */}
+                    <div className="pt-4 border-t border-neutral-800">
+                            <AudioThemesBubbleChart
+                                analysis={audioAnalysis}
+                                isLoading={isLoadingAudioAnalysis}
+                                onReanalyze={fetchAudioAnalysis}
+                                transcriptsCount={project.data.transcripts?.length || 4}
+                                onNavigateToLore={() => onNavigate('lore')}
+                            />
                         </div>
                     </div>
                 )}

@@ -6,8 +6,9 @@ import { UploadIcon } from './icons/UploadIcon';
 import { TrashIcon } from './icons/TrashIcon';
 import { DatabaseIcon, LoadingSpinner, PlusIcon } from './icons.tsx';
 import { factoryService as lorepackService } from '../services/lorepack';
-import { GraphNode, GraphEdge, TripletEdge } from '../types.ts';
+import { GraphNode, GraphEdge, TripletEdge, LoreHypothesis } from '../types.ts';
 import { ForceDirectedGraph } from './ForceDirectedGraph';
+import { generateLoreHypothesesService, parseImageAssetService, extractMetadataService, detectContradictionsService } from '../services/geminiService';
 
 // Firebase Firestore Imports
 import { db, auth } from '../services/firebase';
@@ -17,11 +18,14 @@ interface KnowledgeViewProps {
     agents: Agent[];
     onUpdateAgent: (id: string, updates: Partial<Agent>) => void;
     onCallAgent?: (agent: Agent) => void;
+    projectLore?: any[];
+    projectCharacters?: any[];
+    onAddLore?: (title: string, content: string) => void;
 }
 
 type StudioTab = 'overview' | 'vectors' | 'graph' | 'forge';
 
-export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
+export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents, projectLore = [], projectCharacters = [], onAddLore }) => {
     const [selectedAgentId, setSelectedAgentId] = useState<string>(agents.length > 0 ? agents[0].id : '');
     const selectedAgent = agents.find(a => a.id === selectedAgentId) || agents[0];
     const [activeTab, setActiveTab] = useState<StudioTab>('overview');
@@ -44,7 +48,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
     const [isDragging, setIsDragging] = useState(false);
 
     // Modal Preview State
-    const [previewDoc, setPreviewDoc] = useState<{ title: string; content: string; isLoding?: boolean; highlightText?: string } | null>(null);
+    const [previewDoc, setPreviewDoc] = useState<{ title: string; content: string; isLoding?: boolean; highlightText?: string; imageUrl?: string } | null>(null);
 
     // Semantic Vector Similarity Search State
     const [semanticQuery, setSemanticQuery] = useState('');
@@ -100,6 +104,103 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
             console.error("Failed to load recent searches:", e);
         }
     }, []);
+
+    // Lore Hypothesis Generator & Thematic Cluster Bridge State
+    const [loreHypotheses, setLoreHypotheses] = useState<LoreHypothesis[]>([]);
+    const [isGeneratingHypotheses, setIsGeneratingHypotheses] = useState<boolean>(false);
+    const [hypothesisFilter, setHypothesisFilter] = useState<'all' | 'suggested' | 'accepted'>('all');
+    const [expandedHypothesisId, setExpandedHypothesisId] = useState<string | null>(null);
+
+    // Load hypotheses from localStorage on agent change
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(`mythos_lore_hypotheses_${selectedAgentId || 'global'}`);
+            if (saved) {
+                setLoreHypotheses(JSON.parse(saved));
+            } else {
+                setLoreHypotheses([]);
+            }
+        } catch (e) {
+            console.error("Failed to load hypotheses:", e);
+        }
+    }, [selectedAgentId]);
+
+    const saveHypotheses = (newHypotheses: LoreHypothesis[]) => {
+        setLoreHypotheses(newHypotheses);
+        try {
+            localStorage.setItem(`mythos_lore_hypotheses_${selectedAgentId || 'global'}`, JSON.stringify(newHypotheses));
+        } catch (e) {
+            console.error("Failed to save hypotheses:", e);
+        }
+    };
+
+    const handleGenerateLoreHypotheses = async () => {
+        setIsGeneratingHypotheses(true);
+        try {
+            const docMap = new Map<string, { source: string; category?: string; summary?: string; tags?: string[]; sampleText?: string }>();
+            sources.forEach(src => {
+                const matched = vectors.filter(vec => vec.source === src);
+                const first = matched[0];
+                const textContent = matched.map(m => m.text).join('\n').substring(0, 3000);
+                docMap.set(src, {
+                    source: src,
+                    category: first?.metadata?.collection || 'Root Documents',
+                    summary: first?.metadata?.summary,
+                    tags: first?.metadata?.tags,
+                    sampleText: textContent
+                });
+            });
+
+            const newHypotheses = await generateLoreHypothesesService(
+                Array.from(docMap.values()),
+                customCollections,
+                projectLore,
+                projectCharacters
+            );
+
+            if (newHypotheses && Array.isArray(newHypotheses)) {
+                // Merge without duplicates
+                const existingIds = new Set(loreHypotheses.map(h => h.id));
+                const uniqueNew = newHypotheses.filter((h: any) => !existingIds.has(h.id));
+                const combined = [...uniqueNew, ...loreHypotheses];
+                saveHypotheses(combined);
+                if (newHypotheses.length > 0) {
+                    setExpandedHypothesisId(newHypotheses[0].id);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to generate lore hypotheses:", err);
+        } finally {
+            setIsGeneratingHypotheses(false);
+        }
+    };
+
+    const handleAcceptHypothesis = (id: string) => {
+        const hyp = loreHypotheses.find(h => h.id === id);
+        const updated = loreHypotheses.map(h => h.id === id ? { ...h, status: 'accepted' as const } : h);
+        saveHypotheses(updated);
+        if (hyp && onAddLore) {
+            onAddLore(`Hypothesis Canon: ${hyp.title}`, `${hyp.hypothesis}\n\nEvidence: ${hyp.evidence}\n\nThematic Cluster: ${hyp.thematicCluster}\nConnected Documents: ${hyp.connectedSources.join(', ')}`);
+        }
+    };
+
+    const handleDismissHypothesis = (id: string) => {
+        const updated = loreHypotheses.filter(h => h.id !== id);
+        saveHypotheses(updated);
+    };
+
+    const handlePreviewOrFilterDoc = (sourceName: string) => {
+        const matchedVectors = vectors.filter(v => v.source === sourceName);
+        if (matchedVectors.length > 0) {
+            const combinedContent = matchedVectors.map(v => v.text).join('\n\n---\n\n');
+            setPreviewDoc({
+                title: sourceName,
+                content: combinedContent
+            });
+        } else {
+            setGlobalSearchQuery(sourceName);
+        }
+    };
 
     // Subscribe to collaborative annotations in real-time
     useEffect(() => {
@@ -276,12 +377,14 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
     const stageFiles = (files: FileList | null) => {
       const list = Array.from(files || []);
       if (!list.length) return;
+      const imageExts = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif', 'bmp'];
+      const docExts = ['pdf', 'txt', 'md', 'json', 'jsonl'];
       const supportedList = list.filter(f => {
           const ext = f.name.split('.').pop()?.toLowerCase();
-          return ext && ['pdf', 'txt', 'md', 'json', 'jsonl'].includes(ext);
+          return ext && [...docExts, ...imageExts].includes(ext);
       });
       if (supportedList.length === 0) {
-          alert("No supported files found. Please upload PDF, TXT, MD, or JSON documents.");
+          alert("No supported files found. Supported formats: Images (PNG, JPG, WEBP, GIF, SVG) and Documents (PDF, TXT, MD, JSON).");
           return;
       }
       setFileQueue(prev => [...prev, ...supportedList]);
@@ -290,6 +393,24 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
     const handlePreviewStagedFile = async (file: File) => {
         setPreviewDoc({ title: file.name, content: '', isLoding: true });
         try {
+            const ext = file.name.split('.').pop()?.toLowerCase() || '';
+            const isImage = file.type.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif', 'bmp'].includes(ext);
+            
+            if (isImage) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target?.result as string;
+                    setPreviewDoc({
+                        title: file.name,
+                        content: `🖼️ Image Asset: ${file.name}\nSize: ${(file.size / 1024).toFixed(1)} KB\nFormat: ${file.type || ext.toUpperCase()}\n\nReady for ingestion. Gemini multimodal engine will analyze visual elements, setting, and characters upon indexing.`,
+                        imageUrl: dataUrl,
+                        isLoding: false
+                    });
+                };
+                reader.readAsDataURL(file);
+                return;
+            }
+
             let content = '';
             if (file.name.endsWith('.pdf')) {
                 content = await extractTextFromPdf(file);
@@ -306,9 +427,12 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
     const handlePreviewIndexedSource = (sourceName: string) => {
         const matchedChunks = vectors.filter(v => v.source === sourceName);
         const combinedContent = matchedChunks.map(v => v.text).join('\n\n---\n\n');
+        const imgThumb = matchedChunks.find(v => v.metadata?.thumbnail)?.metadata?.thumbnail ||
+                         matchedChunks.find(v => v.metadata?.imageUrl)?.metadata?.imageUrl;
         setPreviewDoc({
             title: sourceName,
             content: combinedContent || 'No index text found for this source.',
+            imageUrl: imgThumb ? (imgThumb.startsWith('data:') ? imgThumb : `data:${matchedChunks[0]?.metadata?.mimeType || 'image/jpeg'};base64,${imgThumb}`) : undefined,
             isLoding: false
         });
     };
@@ -818,7 +942,10 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
 
     const handleResolveDiscrepancy = async (id: string) => {
         try {
-            await deleteDoc(doc(db, 'discrepancies', id));
+            await setDoc(doc(db, 'discrepancies', id), {
+                status: 'resolved',
+                resolvedAt: new Date().toISOString()
+            }, { merge: true });
         } catch (error) {
             console.error("Failed to resolve discrepancy:", error);
             alert("Failed to dismiss discrepancy alert.");
@@ -867,31 +994,75 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
             const tasks = [];
             for (const f of fileQueue) {
                 let text = '';
-                if (f.name.endsWith('.pdf')) {
+                let imageThumbnail = '';
+                const ext = f.name.split('.').pop()?.toLowerCase() || '';
+                const isImage = f.type.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif', 'bmp'].includes(ext);
+
+                let docSummary = '';
+                let docTags: string[] = [];
+                let docCategory = 'Root Documents';
+
+                if (isImage) {
+                    setStatusMessage(`Analyzing visual asset with Gemini Vision: ${f.name}...`);
+                    const base64Data = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result as string);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(f);
+                    });
+                    imageThumbnail = base64Data;
+
+                    try {
+                        const parsedImage = await parseImageAssetService({
+                            base64: base64Data,
+                            mimeType: f.type || 'image/jpeg',
+                            filename: f.name
+                        });
+                        text = `[VISUAL ASSET: ${f.name}]\nDescription: ${parsedImage.visualDescription}\nSetting: ${parsedImage.setting}\nCharacters: ${parsedImage.characters?.join(', ') || 'None'}\nLore Significance: ${parsedImage.loreSignificance}\nAesthetic Style: ${parsedImage.aestheticStyle || 'Cinematic Concept'}`;
+                        docSummary = parsedImage.summary || parsedImage.visualDescription.slice(0, 180);
+                        docTags = [...(parsedImage.tags || []), 'image_asset', 'visual_lore'];
+                        docCategory = 'Visual Lore Assets';
+                    } catch (pErr) {
+                        console.error("Image parsing failed, using fallback:", pErr);
+                        text = `[VISUAL ASSET: ${f.name}]\nFile: ${f.name}\nSize: ${(f.size / 1024).toFixed(1)} KB\nType: ${f.type || 'image'}`;
+                        docSummary = `Visual asset: ${f.name}`;
+                        docTags = ['image_asset', 'visual_lore'];
+                        docCategory = 'Visual Lore Assets';
+                    }
+                } else if (f.name.endsWith('.pdf')) {
                     setStatusMessage(`Extracting text from PDF: ${f.name}...`);
                     text = await extractTextFromPdf(f);
                 } else {
                     text = await f.text();
                 }
                 
-                setStatusMessage(`Categorizing & extracting summary via Gemini: ${f.name}...`);
-                let docSummary = '';
-                let docTags: string[] = [];
-                let docCategory = 'Root Documents';
-                try {
-                    const metaRes = await fetch('/api/extract-metadata', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text, filename: f.name })
-                    });
-                    if (metaRes.ok) {
-                        const metaData = await metaRes.json();
-                        docSummary = metaData.summary;
-                        docTags = metaData.tags || [];
-                        docCategory = metaData.category || 'Root Documents';
+                if (!isImage) {
+                    setStatusMessage(`Categorizing & extracting summary via Gemini: ${f.name}...`);
+                    try {
+                        const metaRes = await fetch('/api/extract-metadata', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text, filename: f.name })
+                        });
+                        if (metaRes.ok) {
+                            const metaData = await metaRes.json();
+                            docSummary = metaData.summary;
+                            docTags = metaData.tags || [];
+                            docCategory = metaData.category || 'Root Documents';
+                        } else {
+                            throw new Error("Backend offline");
+                        }
+                    } catch (metaErr) {
+                        try {
+                            const fallbackMeta = await extractMetadataService(text, f.name);
+                            docSummary = fallbackMeta.summary;
+                            docTags = fallbackMeta.tags;
+                            docCategory = fallbackMeta.category;
+                        } catch {
+                            docSummary = text.slice(0, 150);
+                            docTags = ['document'];
+                        }
                     }
-                } catch (metaErr) {
-                    console.error("Automated Gemini pipeline metadata extraction failed:", metaErr);
                 }
 
                 // Scan for factual contradictions against existing world context and character profiles
@@ -904,27 +1075,40 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                         semanticLoreTriplets: existingTriplets.map(t => ({ s: t.s, p: t.p, o: t.o }))
                     };
 
-                    const contraRes = await fetch('/api/detect-contradictions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text, filename: f.name, existingContext })
-                    });
+                    let contraData: any = null;
+                    try {
+                        const contraRes = await fetch('/api/detect-contradictions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text, filename: f.name, existingContext })
+                        });
+                        if (contraRes.ok) {
+                            contraData = await contraRes.json();
+                        }
+                    } catch {
+                        // Offline fallback
+                    }
 
-                    if (contraRes.ok) {
-                        const contraData = await contraRes.json();
-                        if (contraData.discrepancies && contraData.discrepancies.length > 0) {
-                            for (const disc of contraData.discrepancies) {
-                                const discId = crypto.randomUUID();
-                                await setDoc(doc(db, 'discrepancies', discId), {
-                                    id: discId,
-                                    agentId: selectedAgentId,
-                                    source: f.name,
-                                    severity: disc.severity || 'medium',
-                                    context: disc.context || 'New text ingest',
-                                    explanation: disc.explanation || 'Contradiction reported',
-                                    createdAt: new Date().toISOString()
-                                });
-                            }
+                    if (!contraData) {
+                        try {
+                            contraData = await detectContradictionsService(text, f.name, existingContext);
+                        } catch {
+                            contraData = { discrepancies: [] };
+                        }
+                    }
+
+                    if (contraData && contraData.discrepancies && contraData.discrepancies.length > 0) {
+                        for (const disc of contraData.discrepancies) {
+                            const discId = crypto.randomUUID();
+                            await setDoc(doc(db, 'discrepancies', discId), {
+                                id: discId,
+                                agentId: selectedAgentId,
+                                source: f.name,
+                                severity: disc.severity || 'medium',
+                                context: disc.context || 'New text ingest',
+                                explanation: disc.explanation || 'Contradiction reported',
+                                createdAt: new Date().toISOString()
+                            });
                         }
                     }
                 } catch (contraErr) {
@@ -955,7 +1139,10 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                         metadata: {
                             summary: docSummary,
                             tags: docTags,
-                            collection: docCategory
+                            collection: docCategory,
+                            type: isImage ? 'image_asset' : 'document',
+                            thumbnail: imageThumbnail || undefined,
+                            mimeType: isImage ? f.type : undefined
                         }
                     });
                 }
@@ -1174,7 +1361,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                     <div className="space-y-8 max-w-5xl mx-auto">
                         {/* KNOWLEDGE DELTA RED-FLAG SYSTEM BANNER */}
                         {(() => {
-                            const highSeverityDiscrepancies = discrepancies.filter(d => d.severity === 'high');
+                            const highSeverityDiscrepancies = discrepancies.filter(d => d.severity === 'high' && d.status !== 'resolved');
                             if (highSeverityDiscrepancies.length === 0) return null;
                             return (
                                 <div className="bg-gradient-to-r from-red-950/90 via-black/90 to-red-950/90 border border-red-500 rounded-2xl p-6 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse space-y-4">
@@ -1238,17 +1425,17 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                                     </p>
                                 </div>
                                 <span className={`text-[10px] font-mono px-2.5 py-1 rounded border font-black uppercase tracking-wider ${
-                                    discrepancies.length > 0 
+                                    discrepancies.filter(d => d.status !== 'resolved').length > 0 
                                         ? 'bg-rose-950/40 border-rose-900/40 text-rose-400 animate-pulse' 
                                         : 'bg-green-950/40 border-green-900/40 text-green-400'
                                 }`}>
-                                    {discrepancies.length > 0 ? `${discrepancies.length} Conflicts Pending` : '✓ 100% Continuity Verified'}
+                                    {discrepancies.filter(d => d.status !== 'resolved').length > 0 ? `${discrepancies.filter(d => d.status !== 'resolved').length} Conflicts Pending` : '✓ 100% Continuity Verified'}
                                 </span>
                             </div>
 
-                            {discrepancies.length > 0 ? (
+                            {discrepancies.filter(d => d.status !== 'resolved').length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
-                                    {discrepancies.map((disc) => (
+                                    {discrepancies.filter(d => d.status !== 'resolved').map((disc) => (
                                         <div key={disc.id} className="bg-black/30 border border-neutral-850 p-4 rounded-xl flex flex-col justify-between gap-3 hover:border-neutral-755 transition-all font-sans relative group">
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center">
@@ -1279,7 +1466,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                                             <div className="pt-2 border-t border-neutral-850/50 flex justify-end">
                                                 <button
                                                     onClick={() => handleResolveDiscrepancy(disc.id)}
-                                                    className="px-3 py-1 bg-green-950/40 hover:bg-green-600 text-green-400 hover:text-white border border-green-900/30 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer"
+                                                    className="px-3 py-1 bg-green-950/40 hover:bg-green-600 text-green-400 hover:text-white border border-green-900/30 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer font-bold"
                                                 >
                                                     Dismiss / Resolve Alert
                                                 </button>
@@ -1296,18 +1483,46 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                           <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center text-center group transition-all col-span-1">
+                           <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center text-center group transition-all col-span-1 shadow-md">
                                 <span className="text-4xl font-black text-white mb-2">{vectorCount}</span>
                                 <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Vector Nodes</span>
                             </div>
-                             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center text-center group transition-all col-span-1">
+                             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center text-center group transition-all col-span-1 shadow-md">
                                 <span className="text-4xl font-black text-white mb-2">{graphEdgeCount}</span>
                                 <span className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Triplet Edges</span>
                             </div>
-                             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center text-center group transition-all col-span-2">
-                                <span className="text-4xl font-black text-white mb-2">{fileQueue.length} <span className="text-lg">files</span> / {(fileQueueSize / (1024*1024)).toFixed(2)} <span className="text-lg">MB</span></span>
+                             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center text-center group transition-all col-span-1 shadow-md">
+                                <span className="text-4xl font-black text-white mb-2">{fileQueue.length} <span className="text-sm">files</span></span>
                                 <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">Files Staged</span>
                             </div>
+                            {/* LORE INTEGRITY DASHBOARD WIDGET */}
+                            {(() => {
+                                const totalContradictions = discrepancies.length;
+                                const resolvedContradictions = discrepancies.filter(d => d.status === 'resolved').length;
+                                const flaggedContradictions = discrepancies.filter(d => d.status !== 'resolved').length;
+                                const score = totalContradictions === 0 ? 100 : Math.round((resolvedContradictions / totalContradictions) * 100);
+
+                                return (
+                                    <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl flex flex-col justify-center group transition-all col-span-1 text-center shadow-md">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Lore Consistency</span>
+                                            <span className="text-2xl font-black text-white font-mono">{score}%</span>
+                                        </div>
+                                        <div className="w-full bg-neutral-800 rounded-full h-2 overflow-hidden my-2 border border-neutral-750/30">
+                                            <div 
+                                                className={`h-full transition-all duration-500 rounded-full ${
+                                                    score > 85 ? 'bg-emerald-500' : score > 50 ? 'bg-amber-500' : 'bg-red-500'
+                                                }`} 
+                                                style={{ width: `${score}%` }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-between text-[9px] text-neutral-500 font-mono">
+                                            <span>Resolved: {resolvedContradictions}</span>
+                                            <span>Flagged: {flaggedContradictions}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {/* KNOWLEDGE GAP & DENSE OVERLAPS HEATMAP */}
@@ -1656,6 +1871,210 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                                         );
                                     })}
                                 </div>
+
+                                {/* LORE HYPOTHESIS GENERATOR & CARDS SECTION */}
+                                <div className="pt-4 border-t border-neutral-800 space-y-3 font-sans">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-amber-400 text-xs">⚡</span>
+                                            <h4 className="text-[11px] font-black uppercase text-neutral-300 tracking-wider">
+                                                Lore Hypotheses
+                                            </h4>
+                                            {loreHypotheses.length > 0 && (
+                                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800/60 font-bold">
+                                                    {loreHypotheses.length}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={handleGenerateLoreHypotheses}
+                                            disabled={isGeneratingHypotheses}
+                                            className="text-[10px] text-amber-400 hover:text-amber-300 font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                                            title="Use Gemini to suggest new narrative connections between disparate lore documents"
+                                        >
+                                            {isGeneratingHypotheses ? (
+                                                <>
+                                                    <span className="w-2.5 h-2.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                                                    <span>Analyzing...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>✨ Generate</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+
+                                    {/* Filter Pills */}
+                                    {loreHypotheses.length > 0 && (
+                                        <div className="flex gap-1 bg-black/40 p-1 rounded-lg border border-neutral-850 text-[9px] font-bold uppercase">
+                                            <button
+                                                onClick={() => setHypothesisFilter('all')}
+                                                className={`flex-1 py-1 rounded text-center transition-all ${
+                                                    hypothesisFilter === 'all' ? 'bg-neutral-800 text-white font-black' : 'text-neutral-400 hover:text-neutral-200'
+                                                }`}
+                                            >
+                                                All ({loreHypotheses.length})
+                                            </button>
+                                            <button
+                                                onClick={() => setHypothesisFilter('suggested')}
+                                                className={`flex-1 py-1 rounded text-center transition-all ${
+                                                    hypothesisFilter === 'suggested' ? 'bg-amber-950 text-amber-300 font-black' : 'text-neutral-400 hover:text-neutral-200'
+                                                }`}
+                                            >
+                                                Pending ({loreHypotheses.filter(h => h.status === 'suggested').length})
+                                            </button>
+                                            <button
+                                                onClick={() => setHypothesisFilter('accepted')}
+                                                className={`flex-1 py-1 rounded text-center transition-all ${
+                                                    hypothesisFilter === 'accepted' ? 'bg-emerald-950 text-emerald-300 font-black' : 'text-neutral-400 hover:text-neutral-200'
+                                                }`}
+                                            >
+                                                Accepted ({loreHypotheses.filter(h => h.status === 'accepted').length})
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Hypotheses Cards List */}
+                                    <div className="space-y-3 max-h-[460px] overflow-y-auto custom-scrollbar pr-1">
+                                        {(() => {
+                                            const filteredHypotheses = loreHypotheses.filter(h => {
+                                                if (hypothesisFilter === 'all') return true;
+                                                return h.status === hypothesisFilter;
+                                            });
+
+                                            if (filteredHypotheses.length === 0) {
+                                                return (
+                                                    <div className="p-4 bg-neutral-950/40 border border-dashed border-neutral-850 rounded-xl text-center space-y-2">
+                                                        <span className="text-xl opacity-40">🔮</span>
+                                                        <p className="text-[10px] text-neutral-400 leading-relaxed">
+                                                            {loreHypotheses.length === 0
+                                                                ? "Discover narrative connections bridging disparate documents based on thematic clusters."
+                                                                : "No hypotheses match this filter."}
+                                                        </p>
+                                                        {loreHypotheses.length === 0 && (
+                                                            <button
+                                                                onClick={handleGenerateLoreHypotheses}
+                                                                disabled={isGeneratingHypotheses}
+                                                                className="px-3 py-1.5 bg-amber-600/90 hover:bg-amber-500 text-white font-black text-[9px] uppercase tracking-wider rounded-lg transition-all shadow cursor-pointer disabled:opacity-40"
+                                                            >
+                                                                {isGeneratingHypotheses ? "Analyzing Clusters..." : "⚡ Generate Hypotheses"}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+
+                                            return filteredHypotheses.map(hyp => {
+                                                const isExpanded = expandedHypothesisId === hyp.id;
+                                                return (
+                                                    <div
+                                                        key={hyp.id}
+                                                        className={`p-3 rounded-xl border transition-all text-xs space-y-2.5 ${
+                                                            hyp.status === 'accepted'
+                                                                ? 'bg-emerald-950/20 border-emerald-800/40 text-neutral-200'
+                                                                : 'bg-neutral-950/60 border-neutral-850 hover:border-amber-500/30 text-neutral-300'
+                                                        }`}
+                                                    >
+                                                        {/* Header: Cluster Badge & Confidence */}
+                                                        <div className="flex justify-between items-start gap-1">
+                                                            <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-amber-400 tracking-wider">
+                                                                {hyp.thematicCluster}
+                                                            </span>
+                                                            <span className="text-[8px] font-mono font-bold text-neutral-400 bg-black/60 px-1.5 py-0.5 rounded">
+                                                                {hyp.confidenceScore}% match
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Title */}
+                                                        <h5 className="font-black text-white text-xs leading-snug">
+                                                            {hyp.title}
+                                                        </h5>
+
+                                                        {/* Connected Documents tags */}
+                                                        <div className="flex flex-wrap items-center gap-1 text-[9px] font-mono">
+                                                            <span className="text-neutral-500 font-sans">Bridges:</span>
+                                                            {hyp.connectedSources.map((src, i) => (
+                                                                <button
+                                                                    key={i}
+                                                                    type="button"
+                                                                    onClick={() => handlePreviewOrFilterDoc(src)}
+                                                                    className="px-1.5 py-0.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-blue-400 hover:text-blue-300 rounded truncate max-w-[130px] transition-all cursor-pointer"
+                                                                    title={`Click to preview "${src}"`}
+                                                                >
+                                                                    📄 {src}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Core narrative hypothesis */}
+                                                        <p className="text-[11px] text-neutral-300 leading-relaxed font-sans">
+                                                            {hyp.hypothesis}
+                                                        </p>
+
+                                                        {/* Expandable Evidence & Screenwriter Beat */}
+                                                        {isExpanded && (
+                                                            <div className="space-y-2 pt-2 border-t border-neutral-850 animate-fade-in text-[10px]">
+                                                                <div className="space-y-0.5">
+                                                                    <span className="text-[8px] font-black uppercase text-neutral-500 tracking-wider block">
+                                                                        Connecting Evidence
+                                                                    </span>
+                                                                    <p className="text-neutral-400 italic leading-snug">
+                                                                        {hyp.evidence}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="space-y-0.5">
+                                                                    <span className="text-[8px] font-black uppercase text-amber-400/90 tracking-wider block">
+                                                                        Screenwriter Scene Hook
+                                                                    </span>
+                                                                    <p className="text-amber-200/90 bg-amber-950/30 p-2 rounded-lg border border-amber-900/30 leading-snug">
+                                                                        💡 {hyp.creativePrompt}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Card Controls */}
+                                                        <div className="flex justify-between items-center pt-1 border-t border-neutral-850/60">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setExpandedHypothesisId(isExpanded ? null : hyp.id)}
+                                                                className="text-[9px] font-bold text-neutral-400 hover:text-neutral-200 transition-colors"
+                                                            >
+                                                                {isExpanded ? '▲ Hide details' : '▼ Details & Beat'}
+                                                            </button>
+
+                                                            <div className="flex items-center gap-1.5">
+                                                                {hyp.status !== 'accepted' ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleAcceptHypothesis(hyp.id)}
+                                                                        className="px-2 py-1 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 hover:text-emerald-300 border border-emerald-800/60 rounded text-[9px] font-black uppercase tracking-wider transition-all"
+                                                                        title="Accept this hypothesis as canon lore connection"
+                                                                    >
+                                                                        ✓ Accept
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-[9px] font-bold text-emerald-400 flex items-center gap-1">
+                                                                        ✓ Canonized
+                                                                    </span>
+                                                                )}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleDismissHypothesis(hyp.id)}
+                                                                    className="p-1 text-neutral-500 hover:text-rose-400 hover:bg-rose-950/30 rounded transition-all"
+                                                                    title="Dismiss this hypothesis"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            });
+                                        })()}
+                                    </div>
+                                </div>
                             </div>
 
                             {/* MAIN FOLDER BROWSER PANEL */}
@@ -1861,8 +2280,23 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                                                 }}
                                             >
                                                 <div className="space-y-1.5">
+                                                    {/* Image Asset Thumbnail for Visual Lore Grid */}
+                                                    {matchingVectors[0]?.metadata?.thumbnail && (
+                                                        <div className="w-full h-28 rounded-lg overflow-hidden border border-neutral-800 bg-black mb-1.5 flex items-center justify-center">
+                                                            <img 
+                                                                src={matchingVectors[0].metadata.thumbnail} 
+                                                                alt={s} 
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <div className="flex justify-between items-start gap-2">
-                                                        <h4 className="text-xs font-bold text-neutral-200 font-mono truncate" title={s}>{s}</h4>
+                                                        <div className="flex items-center gap-1.5 truncate">
+                                                            <span className="text-sm">
+                                                                {matchingVectors[0]?.metadata?.type === 'image_asset' ? '🖼️' : '📄'}
+                                                            </span>
+                                                            <h4 className="text-xs font-bold text-neutral-200 font-mono truncate" title={s}>{s}</h4>
+                                                        </div>
                                                         <input
                                                             type="checkbox"
                                                             checked={isSelected}
@@ -1872,6 +2306,11 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                                                         />
                                                     </div>
                                                     <div className="flex flex-wrap items-center gap-1.5">
+                                                        {matchingVectors[0]?.metadata?.type === 'image_asset' && (
+                                                            <span className="text-[8px] font-mono font-bold bg-amber-950/60 text-amber-400 border border-amber-900/40 px-1.5 py-0.5 rounded">
+                                                                Visual Asset
+                                                            </span>
+                                                        )}
                                                         <span className="text-[9px] bg-neutral-800 text-neutral-500 font-mono px-1.5 py-0.5 rounded">
                                                             {matchingVectors.length} Chunks
                                                         </span>
@@ -2138,7 +2577,14 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({ agents }) => {
                                 </h3>
                             </div>
                             <button
-                                onClick={() => setPreviewDoc(null)}
+                                onClick={() => {
+                                    if (isEditingDoc && (editedContent !== (previewDoc.content || '') || versionComment.trim())) {
+                                        if (!confirm("You have unsaved changes in your document revision. Are you sure you want to discard them and close?")) {
+                                            return;
+                                        }
+                                    }
+                                    setPreviewDoc(null);
+                                }}
                                 className="text-neutral-400 hover:text-white hover:bg-neutral-800 p-2 rounded-lg transition-all"
                                 title="Close Preview"
                             >

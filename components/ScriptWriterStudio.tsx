@@ -15,10 +15,11 @@ import { DuplicateIcon } from './icons/DuplicateIcon';
 import { WandIcon } from './icons/WandIcon';
 import { runScribeAgent, runScribeOutlineAgent, ScribeOutlineOutput } from '../services/geminiService';
 import { generateRandomConfig } from '../services/scribeRandomizer';
-import { ScriptFile, ActiveView, PromptTemplate, DynamicPromptList } from '../types';
+import { ScriptFile, ActiveView, PromptTemplate, DynamicPromptList, NarrativeBranch } from '../types';
 import { MythosData } from '../services/mythosData';
 import { CONTENT_GUIDELINES } from '../services/contentGuidelines';
 import { simpleMarkdownToHtml } from '../utils/textFormatting';
+import { NarrativeBranchingWidget } from './NarrativeBranchingWidget';
 
 const cleanLiteralNewlines = (text: string): string => {
     if (!text) return '';
@@ -63,13 +64,17 @@ interface ScriptWriterStudioProps {
     onNavigate: (view: ActiveView) => void;
     promptTemplates: PromptTemplate[];
     dynamicPromptLists: DynamicPromptList[];
+    characters?: any[];
+    lore?: any[];
 }
 
 export const ScriptWriterStudio: React.FC<ScriptWriterStudioProps> = ({ 
     onSendToScriptsBin, 
     onNavigate,
     promptTemplates,
-    dynamicPromptLists
+    dynamicPromptLists,
+    characters = [],
+    lore = []
 }) => {
     const [isStep1Open, setIsStep1Open] = useState(true);
     const [isStep2Open, setIsStep2Open] = useState(true);
@@ -99,7 +104,7 @@ export const ScriptWriterStudio: React.FC<ScriptWriterStudioProps> = ({
     const [isGeneratingOutline, setIsGeneratingOutline] = useState(false);
     const [isGeneratingScreenplay, setIsGeneratingScreenplay] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [activeOutputTab, setActiveOutputTab] = useState<'outline' | 'screenplay'>('outline');
+    const [activeOutputTab, setActiveOutputTab] = useState<'outline' | 'screenplay' | 'branching'>('outline');
     const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
 
     const genresData = MythosData.genres;
@@ -447,9 +452,10 @@ export const ScriptWriterStudio: React.FC<ScriptWriterStudioProps> = ({
                                         <div className="p-2.5 bg-primary/50 border-b border-accent flex gap-2.5">
                                             <button onClick={() => setActiveOutputTab('outline')} className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] rounded-lg transition-all ${activeOutputTab === 'outline' ? 'bg-surface text-white shadow-xl ring-1 ring-white/10' : 'text-neutral-500 hover:text-neutral-300'}`}>Outline Analysis</button>
                                             <button onClick={() => setActiveOutputTab('screenplay')} className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] rounded-lg transition-all ${activeOutputTab === 'screenplay' ? 'bg-surface text-white shadow-xl ring-1 ring-white/10' : 'text-neutral-500 hover:text-neutral-300'}`}>First Draft</button>
+                                            <button onClick={() => setActiveOutputTab('branching')} className={`flex-1 py-5 text-[11px] font-black uppercase tracking-[0.3em] rounded-lg transition-all ${activeOutputTab === 'branching' ? 'bg-surface text-purple-400 shadow-xl ring-1 ring-purple-500/30' : 'text-neutral-500 hover:text-purple-300'}`}>🔀 Narrative Branches</button>
                                         </div>
 
-                                        <div className="flex-grow bg-primary/60 p-4 md:p-16 font-mono text-sm leading-loose overflow-y-auto min-h-[600px]">
+                                        <div className="flex-grow bg-primary/60 p-4 md:p-12 font-mono text-sm leading-loose overflow-y-auto min-h-[600px]">
                                             {activeOutputTab === 'outline' ? (
                                                 <div className="text-neutral-300 animate-fade-in space-y-16 max-w-5xl mx-auto">
                                                     <div className="text-center border-b border-accent pb-12">
@@ -469,11 +475,59 @@ export const ScriptWriterStudio: React.FC<ScriptWriterStudioProps> = ({
                                                         </div>
                                                     </div>
                                                 </div>
+                                            ) : activeOutputTab === 'screenplay' ? (
+                                                <div className="space-y-12">
+                                                    <div className="text-white animate-fade-in max-w-4xl mx-auto whitespace-pre-wrap" style={{ fontFamily: 'Courier, "Courier New", monospace' }}>
+                                                        <div className="mb-12 md:mb-28 text-center opacity-30 text-[11px] font-black border-y border-white/10 py-8 tracking-[1.5em]">--- SCRIBE FIRST DRAFT ---</div>
+                                                        <div className="px-4 md:px-12 text-base leading-relaxed">{formatToWBStandard(generatedScreenplay)}</div>
+                                                        <div className="mt-24 md:mt-56 text-center opacity-30 text-[11px] tracking-[1em] font-black">FADE OUT.</div>
+                                                    </div>
+
+                                                    {/* In-line narrative branching suggestion prompt */}
+                                                    <div className="max-w-4xl mx-auto pt-8 border-t border-accent font-sans">
+                                                        <NarrativeBranchingWidget
+                                                            sceneContent={generatedScreenplay}
+                                                            scriptTitle={workingTitle || initialTitle}
+                                                            genre={genre}
+                                                            characters={characters}
+                                                            lore={lore}
+                                                            onForkScript={(branch, branchScreenplay) => {
+                                                                onSendToScriptsBin({
+                                                                    title: `${workingTitle || initialTitle} [Branch: ${branch.branchTitle}]`,
+                                                                    content: branchScreenplay,
+                                                                    type: 'screenplay'
+                                                                });
+                                                                showCopyFeedback(`Branch "${branch.branchTitle}" forked to Scripts Bin`);
+                                                            }}
+                                                            onApplyBranchToEditor={(excerpt) => {
+                                                                setGeneratedScreenplay(prev => `${prev}\n\n${excerpt}`);
+                                                                showCopyFeedback("Branch scene appended to draft");
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
                                             ) : (
-                                                <div className="text-white animate-fade-in max-w-4xl mx-auto whitespace-pre-wrap" style={{ fontFamily: 'Courier, "Courier New", monospace' }}>
-                                                    <div className="mb-12 md:mb-28 text-center opacity-30 text-[11px] font-black border-y border-white/10 py-8 tracking-[1.5em]">--- SCRIBE FIRST DRAFT ---</div>
-                                                    <div className="px-4 md:px-12 text-base leading-relaxed">{formatToWBStandard(generatedScreenplay)}</div>
-                                                    <div className="mt-24 md:mt-56 text-center opacity-30 text-[11px] tracking-[1em] font-black">FADE OUT.</div>
+                                                <div className="max-w-5xl mx-auto font-sans">
+                                                    <NarrativeBranchingWidget
+                                                        sceneContent={generatedScreenplay || treatment}
+                                                        scriptTitle={workingTitle || initialTitle}
+                                                        genre={genre}
+                                                        characters={characters}
+                                                        lore={lore}
+                                                        onForkScript={(branch, branchScreenplay) => {
+                                                            onSendToScriptsBin({
+                                                                title: `${workingTitle || initialTitle} [Branch: ${branch.branchTitle}]`,
+                                                                content: branchScreenplay,
+                                                                type: 'screenplay'
+                                                            });
+                                                            showCopyFeedback(`Branch "${branch.branchTitle}" forked to Scripts Bin`);
+                                                        }}
+                                                        onApplyBranchToEditor={(excerpt) => {
+                                                            setGeneratedScreenplay(prev => `${prev}\n\n${excerpt}`);
+                                                            setActiveOutputTab('screenplay');
+                                                            showCopyFeedback("Branch scene appended to draft");
+                                                        }}
+                                                    />
                                                 </div>
                                             )}
                                         </div>

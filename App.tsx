@@ -166,7 +166,20 @@ const fileToBase64 = (file: File): Promise<string> =>
 export const App = () => {
     const [activeView, setActiveView] = useState<ActiveView>('dashboard');
     const [activeProjectId, setActiveProjectId] = useState<string>(DEFAULT_PROJECT_ID);
-    const [projects, setProjects] = useState<Project[]>([INITIAL_PROJECT]);
+    const [projects, setProjects] = useState<Project[]>(() => {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            }
+        } catch (e) {
+            console.error("Failed to parse initial projects from localStorage", e);
+        }
+        return [INITIAL_PROJECT];
+    });
     const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
     const [viewingImage, setViewingImage] = useState<ImageState | null>(null);
     const [chatModalState, setChatModalState] = useState<{ isOpen: boolean; agent: Agent | null; initialMode: 'chat' | 'call' }>({
@@ -489,6 +502,18 @@ export const App = () => {
             } else {
                 setUser(null);
                 setAuthLoading(false);
+                // Ensure local storage projects are restored for offline/local session
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            setProjects(parsed);
+                        }
+                    } catch (e) {
+                        console.error("Local storage project restore failed:", e);
+                    }
+                }
             }
         });
 
@@ -511,22 +536,23 @@ export const App = () => {
             isInitialLoadRef.current = false;
             return;
         }
-        if (!user) return;
 
         setSaveStatus('saving');
 
         const timer = setTimeout(async () => {
             try {
-                // Save to localStorage
+                // ALWAYS Save to localStorage to persist lore, characters, and project data across sessions
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
                 
-                // Save to Firestore
-                for (const proj of projects) {
-                    const projectWithUser = { ...proj, userId: user.uid, updatedAt: new Date().toISOString() };
-                    try {
-                        await setDoc(doc(db, 'users', user.uid, 'projects', proj.id), projectWithUser);
-                    } catch (fsError) {
-                        handleFirestoreError(fsError, OperationType.WRITE, `users/${user.uid}/projects/${proj.id}`);
+                // If user is authenticated with Firebase, also persist to Firestore
+                if (user) {
+                    for (const proj of projects) {
+                        const projectWithUser = { ...proj, userId: user.uid, updatedAt: new Date().toISOString() };
+                        try {
+                            await setDoc(doc(db, 'users', user.uid, 'projects', proj.id), projectWithUser);
+                        } catch (fsError) {
+                            handleFirestoreError(fsError, OperationType.WRITE, `users/${user.uid}/projects/${proj.id}`);
+                        }
                     }
                 }
                 
@@ -537,7 +563,7 @@ export const App = () => {
                 console.error('Auto-save error:', err);
                 setSaveStatus('error');
             }
-        }, 800);
+        }, 500);
 
         return () => clearTimeout(timer);
     }, [projects, user]);
@@ -779,7 +805,7 @@ export const App = () => {
             case 'agent-chat': return <AgentChatStudio agents={project.data.agents} onUploadLore={() => {}} onCallTool={async () => ({ textResult: '' })} onAddToStoryboard={handleAddToStoryboard} onAddToInspiration={handleAddToInspiration} onAddAssetToGrid={handleAddAssetToGrid} />;
             
             // Creation
-            case 'script-writer': return <ScriptWriterStudio onSendToScriptsBin={(s) => updateProjectData({ scriptsBin: [...project.data.scriptsBin, { ...s, id: `script_${Date.now()}`, date: new Date().toLocaleDateString() }] })} onNavigate={handleNavigate} promptTemplates={project.data.promptTemplates} dynamicPromptLists={project.data.dynamicPromptLists} />;
+            case 'script-writer': return <ScriptWriterStudio onSendToScriptsBin={(s) => updateProjectData({ scriptsBin: [...project.data.scriptsBin, { ...s, id: `script_${Date.now()}`, date: new Date().toLocaleDateString() }] })} onNavigate={handleNavigate} promptTemplates={project.data.promptTemplates} dynamicPromptLists={project.data.dynamicPromptLists} characters={project.data.characters} lore={project.data.lore} />;
             case 'veo-3-studio': return <Veo3Studio hfToken={getHfApiKey() || ''} onAddToStoryboard={handleAddToStoryboard} onAddAssetToGrid={handleAddAssetToGrid} projects={[{ id: project.id, name: project.name }]} activeProjectId={project.id} />;
             case 'nano-banana-studio': return <NanoBananaStudio hfToken={getHfApiKey() || ''} promptTemplates={project.data.promptTemplates} dynamicPromptLists={project.data.dynamicPromptLists} agents={project.data.agents} onAddAssetToGrid={handleAddAssetToGrid} onAddToStoryboard={handleAddToStoryboard} onAddToInspiration={handleAddToInspiration} onCreateAgent={(d) => { const newAgent = { ...d, id: `agent_${Date.now()}` } as Agent; updateProjectData({ agents: [...project.data.agents, newAgent] }); return newAgent; }} />;
             case 'lyria-studio': return <LyriaStudio 
@@ -794,7 +820,7 @@ export const App = () => {
                 onSaveTrack={(track) => updateProjectData({ composerTracks: [...(project.data.composerTracks || []), track] })}
                 onDeleteTrack={(id) => updateProjectData({ composerTracks: (project.data.composerTracks || []).filter(t => t.id !== id) })}
             />;
-            case 'image-generator': return <ImageGeneratorStudio hfToken={getHfApiKey() || ''} promptTemplates={project.data.promptTemplates} dynamicPromptLists={project.data.dynamicPromptLists} agents={project.data.agents} onAddAssetToGrid={handleAddAssetToGrid} onAddToStoryboard={handleAddToStoryboard} onAddToInspiration={onAddToInspiration} onCreateAgent={(d) => { const newAgent = { ...d, id: `agent_${Date.now()}` } as Agent; updateProjectData({ agents: [...project.data.agents, newAgent] }); return newAgent; }} />;
+            case 'image-generator': return <ImageGeneratorStudio hfToken={getHfApiKey() || ''} promptTemplates={project.data.promptTemplates} dynamicPromptLists={project.data.dynamicPromptLists} agents={project.data.agents} onAddAssetToGrid={handleAddAssetToGrid} onAddToStoryboard={handleAddToStoryboard} onAddToInspiration={onAddToInspiration} onCreateAgent={(d) => { const newAgent = { ...d, id: `agent_${Date.now()}` } as Agent; updateProjectData({ agents: [...project.data.agents, newAgent] }); return newAgent; }} lore={project.data.lore} characters={project.data.characters} />;
             case 'one-shot-cinematic': return <SimpleCinematicStudio hfToken={getHfApiKey() || ''} onAddAssetToGrid={handleAddAssetToGrid} onAddToStoryboard={handleAddToStoryboard} onAddToInspiration={handleAddToInspiration} project={project} />;
             case 'mythos-cinematic-engine': return <MythosCinematicStudio hfToken={getHfApiKey() || ''} promptTemplates={project.data.promptTemplates} dynamicPromptLists={project.data.dynamicPromptLists} onAddAssetToGrid={handleAddAssetToGrid} onAddToStoryboard={handleAddToStoryboard} onAddToInspiration={handleAddToInspiration} onClearInitialPrompt={() => {}} />;
             case 'generative-video': return <GenerativeVideoStudio hfToken={getHfApiKey() || ''} videoState={project.data.generativeVideoState} onStateUpdate={s => updateProjectData({ generativeVideoState: s })} onAddToStoryboard={handleAddToStoryboard} onAddAssetToGrid={handleAddAssetToGrid} projects={[{ id: project.id, name: project.name }]} activeProjectId={project.id} />;
@@ -830,10 +856,25 @@ export const App = () => {
             
             // Knowledge
             case 'characters': return <CharactersStudio characters={project.data.characters} onCreate={(c) => updateProjectData({ characters: [...project.data.characters, { ...c, id: `char_${Date.now()}` } as any] })} onUpdate={(id, u) => updateProjectData({ characters: project.data.characters.map(c => c.id === id ? { ...c, ...u } : c) })} onDelete={(id) => updateProjectData({ characters: project.data.characters.filter(c => c.id !== id) })} />;
-            case 'lore': return <LoreStudio lore={project.data.lore} projects={projects} characters={project.data.characters} promptTemplates={project.data.promptTemplates} images={project.data.images} activeProjectId={project.id} onCreate={(t, c, pid) => updateProjectData({ lore: [...project.data.lore, { id: `lore_${Date.now()}`, title: t, content: c, projectId: pid }] })} onUpdate={(id, t, c) => updateProjectData({ lore: project.data.lore.map(l => l.id === id ? { ...l, title: t, content: c } : l) })} onDelete={(id) => updateProjectData({ lore: project.data.lore.filter(l => l.id !== id) })} onUpdateCharacters={(chars) => updateProjectData({ characters: chars })} onUpdateLore={(loreEntries) => updateProjectData({ lore: loreEntries })} />;
+            case 'lore': return <LoreStudio lore={project.data.lore} projects={projects} characters={project.data.characters} promptTemplates={project.data.promptTemplates} images={project.data.images} activeProjectId={project.id} onCreate={(t, c, pid) => {
+                const targetPid = pid || project.id;
+                const newEntry = { id: `lore_${Date.now()}`, title: t, content: c, projectId: targetPid };
+                setProjects(prev => prev.map(p => {
+                    if (p.id === targetPid) {
+                        return {
+                            ...p,
+                            data: {
+                                ...p.data,
+                                lore: [...(p.data.lore || []), newEntry]
+                            }
+                        };
+                    }
+                    return p;
+                }));
+            }} onUpdate={(id, t, c) => updateProjectData({ lore: project.data.lore.map(l => l.id === id ? { ...l, title: t, content: c } : l) })} onDelete={(id) => updateProjectData({ lore: project.data.lore.filter(l => l.id !== id) })} onUpdateCharacters={(chars) => updateProjectData({ characters: chars })} onUpdateLore={(loreEntries) => updateProjectData({ lore: loreEntries })} />;
             case 'prompt-library': return <PromptLibraryStudio templates={project.data.promptTemplates} onCreate={(n, p, neg) => updateProjectData({ promptTemplates: [...project.data.promptTemplates, { id: `tmpl_${Date.now()}`, name: n, positivePrompt: p, negativePrompt: neg }] })} onUpdate={(id, n, p, neg) => updateProjectData({ promptTemplates: project.data.promptTemplates.map(t => t.id === id ? { ...t, name: n, positivePrompt: p, negativePrompt: neg } : t) })} onDelete={(id) => updateProjectData({ promptTemplates: project.data.promptTemplates.filter(t => t.id !== id) })} />;
             case 'dynamic-prompts': return <DynamicPromptsStudio lists={project.data.dynamicPromptLists} onCreate={(n, i) => updateProjectData({ dynamicPromptLists: [...project.data.dynamicPromptLists, { id: `list_${Date.now()}`, name: n, items: i }] })} onUpdate={(id, n, i) => updateProjectData({ dynamicPromptLists: project.data.dynamicPromptLists.map(l => l.id === id ? { ...l, name: n, items: i } : l) })} onDelete={(id) => updateProjectData({ dynamicPromptLists: project.data.dynamicPromptLists.filter(l => l.id !== id) })} />;
-            case 'knowledge': return <KnowledgeView agents={project.data.agents} onUpdateAgent={(id, u) => updateProjectData({ agents: project.data.agents.map(a => a.id === id ? { ...a, ...u } : a) })} />;
+            case 'knowledge': return <KnowledgeView agents={project.data.agents} onUpdateAgent={(id, u) => updateProjectData({ agents: project.data.agents.map(a => a.id === id ? { ...a, ...u } : a) })} projectLore={project.data.lore} projectCharacters={project.data.characters} onAddLore={(title, content) => updateProjectData({ lore: [...project.data.lore, { id: `lore_${Date.now()}`, title, content, projectId: project.id }] })} />;
             case 'automation': return <AutomationStudio config={project.data.automationConfig} onSave={(c) => updateProjectData({ automationConfig: c })} onTestWebhook={async () => true} />;
             case 'studio-players': return <RosterStudio rosterType='player' agents={project.data.studioPlayers} images={[]} onCreateEntity={(d) => { const newAgent = { ...d, id: `player_${Date.now()}` } as Agent; updateProjectData({ studioPlayers: [...project.data.studioPlayers, newAgent] }); return newAgent; }} onViewImage={() => {}} onUpdateEntity={(id, u) => updateProjectData({ studioPlayers: project.data.studioPlayers.map(p => p.id === id ? { ...p, ...u } : p) })} onDeleteEntity={(id) => updateProjectData({ studioPlayers: project.data.studioPlayers.filter(p => p.id !== id) })} onImageUpload={() => {}} onCallEntity={() => {}} />;
             
@@ -1076,7 +1117,14 @@ export const App = () => {
 
             {/* REAL-TIME KNOWLEDGE DELTA CONTRADICTION TOAST */}
             {activeToastDiscrepancy && (
-                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md bg-gradient-to-r from-red-950 via-black to-red-950 border border-red-500 rounded-2xl p-4 shadow-[0_0_25px_rgba(239,68,68,0.4)] flex flex-col gap-2.5 backdrop-blur-md animate-bounce">
+                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md bg-gradient-to-r from-red-950 via-black to-red-950 border border-red-500 rounded-2xl p-4 shadow-[0_0_25px_rgba(239,68,68,0.4)] flex flex-col gap-2.5 backdrop-blur-md animate-slide-in-down">
+                    <style>{`
+                        @keyframes slideInDown {
+                            from { transform: translate(-50%, -150%); opacity: 0; }
+                            to { transform: translate(-50%, 0); opacity: 1; }
+                        }
+                        .animate-slide-in-down { animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                    `}</style>
                     <div className="flex justify-between items-center pb-1.5 border-b border-red-900/30">
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />

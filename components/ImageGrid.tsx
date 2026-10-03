@@ -827,6 +827,23 @@ export const ImageGrid: React.FC<ImageGridProps> = ({ images, isLoading, error, 
                                 {gridOverlay === 'golden-triadic' && <TriadicGoldenRatioGridOverlay />}
                             </>
                         )}
+
+                        {/* Visual Lore Consistency Deviation / Verification Badge */}
+                        {image.metadata?.loreConsistency && (
+                            <div 
+                                className={`absolute bottom-2.5 left-2.5 z-20 px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 shadow-lg backdrop-blur-md border ${
+                                    image.metadata.loreConsistency.status === 'deviated'
+                                        ? 'bg-rose-950/90 text-rose-300 border-rose-500/80 animate-pulse'
+                                        : 'bg-emerald-950/90 text-emerald-300 border-emerald-500/70'
+                                }`}
+                                title={image.metadata.loreConsistency.status === 'deviated' 
+                                    ? `⚠️ Visual Lore Deviation Flagged: ${image.metadata.loreConsistency.deviations?.map((d: any) => `${d.entity}: ${d.promptConflict} (Expected: ${d.expectedLore})`).join('; ') || 'Conflicts with established lore'}` 
+                                    : '✓ 100% Visual Lore Verified'}
+                            >
+                                <span>{image.metadata.loreConsistency.status === 'deviated' ? '⚠️' : '✓'}</span>
+                                <span>{image.metadata.loreConsistency.status === 'deviated' ? 'Lore Deviation' : 'Lore Verified'}</span>
+                            </div>
+                        )}
                         
                         <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" onClick={e => e.stopPropagation()}>
                           {image.type === 'image' && image.base64 && (

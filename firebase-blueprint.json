@@ -56,7 +56,9 @@
         "severity": { "type": "string", "enum": ["high", "medium", "low"] },
         "context": { "type": "string" },
         "explanation": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" },
+        "resolvedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "agentId", "source", "severity", "context", "explanation"]
     },

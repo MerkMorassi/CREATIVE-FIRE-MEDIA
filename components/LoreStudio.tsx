@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { LoreEntry } from '../types.ts';
 import { LoreIcon, FolderIcon } from './icons.tsx';
 import { LoreNetwork } from './LoreNetwork.tsx';
+import { batchCategorizeWithGemini } from '../services/geminiService.ts';
 
 interface ProjectSummary {
     id: string;
@@ -114,22 +115,29 @@ const LoreClusteringUtility: React.FC<{
                 return;
             }
 
-            setProgressStatus("Synthesizing clusters with Gemini 2.5...");
+            setProgressStatus("Synthesizing clusters with Gemini...");
 
-            const res = await fetch('/api/batch-categorize', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items })
-            });
+            let data: any = null;
+            try {
+                const res = await fetch('/api/batch-categorize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items })
+                });
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || "Batch categorization failed");
+                if (res.ok) {
+                    data = await res.json();
+                }
+            } catch (networkErr) {
+                console.warn("Backend batch-categorize endpoint offline, falling back to direct client Gemini:", networkErr);
             }
 
-            const data = await res.json();
+            if (!data || !data.mappings) {
+                // Client-side Gemini fallback
+                data = await batchCategorizeWithGemini(items);
+            }
             
-            if (data.mappings) {
+            if (data && data.mappings) {
                 const compiled: ClusteringResult[] = [];
                 items.forEach(item => {
                     const mapped = data.mappings[item.id];

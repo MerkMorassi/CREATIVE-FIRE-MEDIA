@@ -87,7 +87,7 @@ service cloud.firestore {
     // Standalone validation helper for discrepancies
     function isValidDiscrepancy(data) {
       return data.keys().hasAll(['id', 'agentId', 'source', 'severity', 'context', 'explanation'])
-        && data.keys().hasOnly(['id', 'agentId', 'source', 'severity', 'context', 'explanation', 'createdAt'])
+        && data.keys().hasOnly(['id', 'agentId', 'source', 'severity', 'context', 'explanation', 'createdAt', 'status', 'resolvedAt'])
         && data.id is string && data.id.size() <= 128
         && data.agentId is string && data.agentId.size() <= 128
         && data.source is string && data.source.size() <= 512
@@ -103,7 +103,10 @@ service cloud.firestore {
         && isValidId(discrepancyId)
         && incoming().id == discrepancyId
         && isValidDiscrepancy(incoming());
-      allow update: if false;
+      allow update: if isSignedIn()
+        && incoming().id == existing().id
+        && incoming().agentId == existing().agentId
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'resolvedAt']);
       allow delete: if isSignedIn();
     }
 

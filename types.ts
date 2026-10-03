@@ -654,6 +654,90 @@ export interface CanonBlock {
     feedback?: string;
 }
 
+export interface LoreHypothesis {
+    id: string;
+    title: string;
+    thematicCluster: string;
+    connectedSources: string[];
+    hypothesis: string;
+    evidence: string;
+    creativePrompt: string;
+    confidenceScore: number;
+    status: 'suggested' | 'accepted' | 'dismissed';
+    createdAt: string;
+}
+
+export interface AudioPlotTheme {
+    id: string;
+    name: string;
+    frequency: number;
+    sentiment: 'positive' | 'neutral' | 'negative' | 'tense' | 'mysterious';
+    sentimentScore: number;
+    category: string;
+    contextSnippet: string;
+    occurrences: number;
+    relatedCharacters?: string[];
+}
+
+export interface AudioSentimentAnalysis {
+    overallSentiment: {
+        dominant: string;
+        positive: number;
+        neutral: number;
+        tenseOrNegative: number;
+        mysterious: number;
+    };
+    sentimentArc: Array<{
+        segment: string;
+        tone: string;
+        shiftNote: string;
+    }>;
+    recurringKeywords: Array<{
+        word: string;
+        count: number;
+        sentiment: 'positive' | 'neutral' | 'negative' | 'tense';
+        category: string;
+    }>;
+    plotThemes: AudioPlotTheme[];
+    summary: string;
+    analyzedRecordingsCount: number;
+    lastAnalyzedAt: string;
+}
+
+export interface NarrativeBranch {
+    id: string;
+    branchTitle: string;
+    dramaticTone: string;
+    turningPoint: string;
+    narrativeSummary: string;
+    screenplayExcerpt: string;
+    characterConsequences: string[];
+    thematicShift: string;
+    divergencePoint?: string;
+    timestamp?: number;
+}
+
+export interface VisualLoreConsistencyResult {
+    isConsistent: boolean;
+    confidenceScore: number;
+    status: 'consistent' | 'deviated' | 'neutral';
+    matchingLore: Array<{ title: string; matchingDetails: string }>;
+    deviations: Array<{ entity: string; expectedLore: string; promptConflict: string; severity: 'warning' | 'critical' }>;
+    suggestedCorrection: string;
+    explanation: string;
+    checkedAt: string;
+}
+
+export interface ParsedImageAsset {
+    visualDescription: string;
+    characters: string[];
+    setting: string;
+    tags: string[];
+    summary: string;
+    loreSignificance: string;
+    aestheticStyle?: string;
+}
+
 export interface GemmaConfig {
   modelName: string;
   apiKey: string;

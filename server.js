@@ -559,6 +559,322 @@ app.post('/api/transcribe', async (req, res) => {
     }
 });
 
+// --- LORE HYPOTHESIS GENERATOR ENDPOINT ---
+// Uses Gemini to discover narrative connections between disparate lore documents based on thematic clusters.
+app.post('/api/generate-lore-hypotheses', async (req, res) => {
+    const { documents = [], thematicClusters = [], loreEntries = [], characters = [] } = req.body;
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+        return res.status(500).json({ error: "Server API Key not configured." });
+    }
+
+    try {
+        const ai = new GoogleGenAI({ apiKey });
+
+        // Compile documents pool, falling back to foundational universe lore if documents pool is sparse
+        let docPool = documents;
+        if (!docPool || docPool.length < 2) {
+            const fallbackLore = [
+                {
+                    source: "Chronicles of the Obsidian Spire.md",
+                    category: "World Building",
+                    summary: "An ancient monolith pulsing with chronal energy, maintained by an ascetic order sworn to silence.",
+                    tags: ["monolith", "chronal energy", "obsidian", "ascetic order"]
+                },
+                {
+                    source: "Aetherium Guild Manifest.pdf",
+                    category: "Reference Documents",
+                    summary: "Financial records and trade manifests detailing illicit shipments of distilled void-salt across planetary quadrants.",
+                    tags: ["trade", "void-salt", "guild", "contraband"]
+                },
+                {
+                    source: "Sector 7 Rebel Transmission.txt",
+                    category: "Scripts",
+                    summary: "Intercepted audio log from rebel commander Vaelen describing blackouts in the lower biosphere and rogue biomechanical drones.",
+                    tags: ["rebellion", "blackout", "drones", "vaelen"]
+                },
+                {
+                    source: "Project Chrysalis Genesis Dossier.docx",
+                    category: "Character Profiles",
+                    summary: "Classified genetic augmentation experiment records linking the royal lineage to early synthetically bred navigators.",
+                    tags: ["chrysalis", "royal dynasty", "genetic augmentation", "navigators"]
+                }
+            ];
+            docPool = [...(docPool || []), ...fallbackLore];
+        }
+
+        const prompt = `You are a visionary narrative designer and worldbuilding lore director for high-concept sci-fi, fantasy, and cinematic universes.
+Your mission: Analyze the disparate lore documents below (which span different thematic clusters, folders, and characters) and invent 3 to 5 deeply compelling, surprising, yet logical "Lore Hypotheses".
+
+Each Lore Hypothesis represents an unrevealed narrative connection bridging at least two DISPARATE documents:
+- E.g. A secret alliance, an obscured historical catastrophe, a common technological progenitor, an undisclosed bloodline, or a covert betrayal.
+
+Available Documents & Lore Context:
+${JSON.stringify(docPool.slice(0, 12), null, 2)}
+
+Existing Characters & Lore:
+${JSON.stringify((characters || []).slice(0, 8), null, 2)}
+
+Return a JSON array of 3 to 5 distinct Lore Hypotheses in this EXACT JSON structure:
+[
+  {
+    "id": "hyp_unique_id",
+    "title": "Evocative, dramatic title (e.g. 'The Aetherium-Chrysalis Conspiracy', 'Echoes of the Obsidian Monolith')",
+    "thematicCluster": "Thematic cluster name (e.g. 'Cosmic Anomalies & Dynastic Succession', 'Forbidden Technology', 'Subterranean Insurgency')",
+    "connectedSources": ["Document 1 Name", "Document 2 Name"],
+    "hypothesis": "2 to 3 sentences explaining the hidden narrative bridge connecting these documents and what it implies for the story world.",
+    "evidence": "Concrete narrative breadcrumbs, thematic motifs, or temporal clues in both documents that support this hypothesis.",
+    "creativePrompt": "A provocative scene beat or writing prompt for the screenwriters' room to test this connection in upcoming drafts.",
+    "confidenceScore": 88
+  }
+]`;
+
+        const response = await ai.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json"
+            }
+        });
+
+        let hypotheses = [];
+        try {
+            const parsed = JSON.parse(response.text);
+            hypotheses = Array.isArray(parsed) ? parsed : (parsed.hypotheses || []);
+        } catch (e) {
+            console.error("[LORE HYPOTHESES] JSON parse failed, extracting via regex:", e);
+            const match = response.text.match(/\[[\s\S]*\]/);
+            if (match) {
+                hypotheses = JSON.parse(match[0]);
+            }
+        }
+
+        // Ensure well-formed attributes
+        const formatted = hypotheses.map((h, i) => ({
+            id: h.id || `hyp_${Date.now()}_${i}`,
+            title: h.title || `Narrative Link #${i + 1}`,
+            thematicCluster: h.thematicCluster || "Thematic Synthesis",
+            connectedSources: Array.isArray(h.connectedSources) ? h.connectedSources : [docPool[0]?.source, docPool[1]?.source].filter(Boolean),
+            hypothesis: h.hypothesis || "A discovered narrative connection between disparate universe documents.",
+            evidence: h.evidence || "Overlapping thematic motifs and character mentions.",
+            creativePrompt: h.creativePrompt || "Draft an exchange between key figures investigating this connection.",
+            confidenceScore: typeof h.confidenceScore === 'number' ? h.confidenceScore : Math.floor(Math.random() * 16) + 80,
+            status: 'suggested',
+            createdAt: new Date().toISOString()
+        }));
+
+        console.log(`[LORE HYPOTHESES] Generated ${formatted.length} hypotheses successfully.`);
+        res.json({ hypotheses: formatted });
+
+    } catch (error) {
+        console.error("[LORE HYPOTHESIS ERROR]", error);
+        res.status(500).json({ error: "Failed to generate narrative hypotheses: " + error.message });
+    }
+});
+
+// --- AUDIO TRANSCRIPT SENTIMENT & PLOT THEMES ANALYZER ENDPOINT ---
+// Analyzes transcribed audio recordings for key sentiment trends, recurring keywords, and plot themes for bubble chart visualization.
+app.post('/api/analyze-audio-sentiment-themes', async (req, res) => {
+    const { transcripts = [], projectName = "Cinematic Universe" } = req.body;
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+        return res.status(500).json({ error: "Server API Key not configured." });
+    }
+
+    try {
+        const ai = new GoogleGenAI({ apiKey });
+
+        // Fallback sample studio voice transcripts if user hasn't recorded/transcribed audio yet
+        let transcriptData = transcripts;
+        if (!transcriptData || transcriptData.length === 0) {
+            transcriptData = [
+                {
+                    id: "tr_sample_1",
+                    title: "Director Voice Memo - Act II Climax & Citadel Breach",
+                    text: "Voice memo October 12th. Thinking through the Citadel breach scene with Marcus and Vaelen. The tone needs to shift from claustrophobic suspense to desperate defiance. Marcus realizes the Obsidian seal was never broken from the outside—it was opened from within by the Council itself. We need heavy ominous strings, then sudden silence when the reactor initiates. The betrayal must hit like a freight train.",
+                    timestamp: Date.now() - 86400000 * 3
+                },
+                {
+                    id: "tr_sample_2",
+                    title: "Table Read Dialogue - Sector 7 Council Infiltration",
+                    text: "Table read segment 4B. Character Lyra whispers: 'The void-salt shipments aren't for power grids, they're for biological stasis.' Kael responds with shock: 'You mean Project Chrysalis is active?' High tension, whispering, quick breathing. We hear alarms echoing in the distance. Lyra insists on confronting the Grand Chancellor before the moon aligns with the orbital array.",
+                    timestamp: Date.now() - 86400000 * 2
+                },
+                {
+                    id: "tr_sample_3",
+                    title: "Writer's Room Debrief - Character Arc Resolution",
+                    text: "Session notes from the writers' room. Key question: Can Vaelen ever be redeemed after the blackout incident? Consensus is that his redemption shouldn't come through victory, but through sacrifice. The recurring motif of the broken chronal compass needs to pay off in the finale. When he hands the relic to Lyra, the emotional tone should be poignant, bittersweet, and triumphant all at once.",
+                    timestamp: Date.now() - 86400000 * 1
+                },
+                {
+                    id: "tr_sample_4",
+                    title: "Sound Stage Acoustic Test - Monolith Resonance Audio",
+                    text: "Field test memo. The acoustic feedback inside the soundstage simulates the resonance of the sunken monolith. Low frequency rumbles around 32Hz, layered with discordant choir harmonies. The sound designer notes this should accompany every scene where the chronal fracture begins expanding across the city skyline.",
+                    timestamp: Date.now() - 3600000 * 12
+                }
+            ];
+        }
+
+        const prompt = `You are a senior story analyst, audio dramaturgist, and sentiment intelligence specialist for cinematic productions.
+Analyze the following collection of transcribed audio recordings from the project "${projectName}":
+
+Audio Transcripts:
+${JSON.stringify(transcriptData, null, 2)}
+
+Provide an authoritative, detailed intelligence report that:
+1. Analyzes KEY SENTIMENT TRENDS across the transcripts (overall distribution percentages of positive/hopeful, neutral, tense/conflict, and mysterious/suspense, plus emotional shift arc across the timeline).
+2. Identifies COMMON RECURRING KEYWORDS and their frequency count and category.
+3. Identifies EMERGING PLOT THEMES formatted specifically for rendering as an interactive BUBBLE CHART:
+   - Each bubble represents a distinct emerging narrative or plot theme.
+   - Frequency (number between 18 and 65) represents the prominence/size of the bubble.
+   - Sentiment specifies the emotional tone ('tense' | 'mysterious' | 'positive' | 'negative' | 'neutral').
+   - SentimentScore (-1.0 to +1.0) specifies the valence.
+   - Category (e.g. 'Conspiracy & Betrayal', 'Cosmic Technology', 'Emotional Redemption', 'Faction Warfare', 'Acoustic Lore').
+   - ContextSnippet (an evocative excerpt from the transcripts referencing this theme).
+   - Occurrences (estimated count of mentions/reverberations).
+   - RelatedCharacters (array of characters linked to this theme).
+
+Return the output in this EXACT JSON structure:
+{
+  "overallSentiment": {
+    "dominant": "Tense & Suspenseful",
+    "positive": 22,
+    "neutral": 18,
+    "tenseOrNegative": 42,
+    "mysterious": 18
+  },
+  "sentimentArc": [
+    {
+      "segment": "Citadel Breach & Council Betrayal",
+      "tone": "Desperate & Suspenseful",
+      "shiftNote": "Sharp transition from covert planning to urgent existential threat"
+    },
+    {
+      "segment": "Sector 7 Infiltration & Void-Salt Discovery",
+      "tone": "Conspiratorial & Shock",
+      "shiftNote": "Revelation of Project Chrysalis escalates moral stakes"
+    },
+    {
+      "segment": "Writers Room Resolution",
+      "tone": "Bittersweet & Poignant",
+      "shiftNote": "Emotional catharsis through sacrificial redemption motif"
+    }
+  ],
+  "recurringKeywords": [
+    { "word": "Obsidian Seal", "count": 7, "sentiment": "tense", "category": "Artifacts" },
+    { "word": "Chrysalis", "count": 6, "sentiment": "mysterious", "category": "Conspiracies" },
+    { "word": "Void-Salt", "count": 5, "sentiment": "tense", "category": "Technology" },
+    { "word": "Redemption", "count": 4, "sentiment": "positive", "category": "Character Arcs" },
+    { "word": "Chronal Fracture", "count": 4, "sentiment": "mysterious", "category": "Cosmic" },
+    { "word": "Blackout", "count": 3, "sentiment": "negative", "category": "Plot Events" }
+  ],
+  "plotThemes": [
+    {
+      "id": "theme_obsidian_seal",
+      "name": "The Obsidian Seal Breach",
+      "frequency": 58,
+      "sentiment": "tense",
+      "sentimentScore": -0.65,
+      "category": "Conspiracy & Betrayal",
+      "contextSnippet": "The seal was never broken from the outside—it was opened from within by the Council itself.",
+      "occurrences": 7,
+      "relatedCharacters": ["Marcus", "Vaelen", "Council"]
+    },
+    {
+      "id": "theme_project_chrysalis",
+      "name": "Project Chrysalis Awakening",
+      "frequency": 48,
+      "sentiment": "mysterious",
+      "sentimentScore": -0.4,
+      "category": "Forbidden Science",
+      "contextSnippet": "Void-salt shipments aren't for power grids, they're for biological stasis in Project Chrysalis.",
+      "occurrences": 6,
+      "relatedCharacters": ["Lyra", "Grand Chancellor", "Kael"]
+    },
+    {
+      "id": "theme_sacrificial_redemption",
+      "name": "Sacrificial Redemption Arc",
+      "frequency": 42,
+      "sentiment": "positive",
+      "sentimentScore": 0.7,
+      "category": "Emotional Redemption",
+      "contextSnippet": "His redemption shouldn't come through victory, but through sacrifice, handing the relic to Lyra.",
+      "occurrences": 5,
+      "relatedCharacters": ["Vaelen", "Lyra"]
+    },
+    {
+      "id": "theme_chronal_fracture",
+      "name": "Chronal Fracture Expansion",
+      "frequency": 36,
+      "sentiment": "mysterious",
+      "sentimentScore": -0.2,
+      "category": "Cosmic Anomaly",
+      "contextSnippet": "Low frequency resonance at 32Hz as the chronal fracture begins expanding across the skyline.",
+      "occurrences": 4,
+      "relatedCharacters": ["Sound Designer", "Marcus"]
+    },
+    {
+      "id": "theme_sector7_blackout",
+      "name": "Sector 7 Sabotage & Blackout",
+      "frequency": 32,
+      "sentiment": "negative",
+      "sentimentScore": -0.8,
+      "category": "Faction Warfare",
+      "contextSnippet": "Rogue biomechanical drones initiating catastrophic blackouts in the lower biosphere.",
+      "occurrences": 4,
+      "relatedCharacters": ["Vaelen", "Rebel Squad"]
+    },
+    {
+      "id": "theme_broken_compass",
+      "name": "The Broken Chronal Compass",
+      "frequency": 28,
+      "sentiment": "positive",
+      "sentimentScore": 0.5,
+      "category": "Narrative Motif",
+      "contextSnippet": "The recurring motif of the broken chronal compass needs to pay off with bittersweet resonance.",
+      "occurrences": 3,
+      "relatedCharacters": ["Lyra", "Vaelen"]
+    }
+  ],
+  "summary": "Transcriptions highlight an accelerating dramatic shift toward high-stakes institutional betrayal centered around the Obsidian Seal and Project Chrysalis, counterbalanced by emotional redemption themes."
+}`;
+
+        const response = await ai.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json"
+            }
+        });
+
+        let analysisData;
+        try {
+            analysisData = JSON.parse(response.text);
+        } catch (e) {
+            console.error("[AUDIO SENTIMENT ANALYZER] Failed to parse JSON, falling back to regex:", e);
+            const match = response.text.match(/\{[\s\S]*\}/);
+            if (match) {
+                analysisData = JSON.parse(match[0]);
+            } else {
+                throw e;
+            }
+        }
+
+        analysisData.analyzedRecordingsCount = transcriptData.length;
+        analysisData.lastAnalyzedAt = new Date().toISOString();
+
+        console.log(`[AUDIO SENTIMENT ANALYZER] Analyzed ${transcriptData.length} transcripts. Generated ${analysisData.plotThemes?.length || 0} plot theme bubbles.`);
+        res.json(analysisData);
+
+    } catch (error) {
+        console.error("[AUDIO SENTIMENT ANALYZER ERROR]", error);
+        res.status(500).json({ error: "Failed to analyze audio transcripts: " + error.message });
+    }
+});
+
+
 // Priority: Serve static files from 'dist' folder (standard Vite output)
 const distPath = path.join(__dirname, 'dist');
 if (fs.existsSync(distPath)) {

@@ -33,8 +33,8 @@ export const ForceDirectedGraph: React.FC<ForceDirectedGraphProps> = ({ tripletE
     const [showLabels, setShowLabels] = useState<boolean>(true);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
-    // Selection & Neighbors Tracking
-    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+    // Selection & Neighbors Tracking (Knowledge Map Multi-Select Visual Query)
+    const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
     const [hoveredNode, setHoveredNode] = useState<{ id: string; degree: number; connections: string[] } | null>(null);
 
     useEffect(() => {
@@ -194,14 +194,16 @@ export const ForceDirectedGraph: React.FC<ForceDirectedGraphProps> = ({ tripletE
 
             node.selectAll('circle').attr('fill', (d: any) => {
                 if (query && d.id.toLowerCase().includes(query)) return '#f59e0b'; // Amber Highlight
-                if (selectedNodeId) {
-                    if (d.id === selectedNodeId) return '#3b82f6';
-                    // Check if neighbor
-                    const isNeighbor = linksList.some(l => 
-                        (l.source as D3Node).id === selectedNodeId && (l.target as D3Node).id === d.id ||
-                        (l.target as D3Node).id === selectedNodeId && (l.source as D3Node).id === d.id
-                    );
-                    if (isNeighbor) return '#a855f7';
+                if (selectedNodeIds.length > 0) {
+                    if (selectedNodeIds.includes(d.id)) return '#3b82f6'; // Bright blue for selected
+                    // Check if neighbor of any selected node
+                    const isNeighbor = linksList.some(l => {
+                        const sId = (l.source as D3Node).id;
+                        const tId = (l.target as D3Node).id;
+                        return (selectedNodeIds.includes(sId) && tId === d.id) ||
+                               (selectedNodeIds.includes(tId) && sId === d.id);
+                    });
+                    if (isNeighbor) return '#a855f7'; // Purple neighbor
                     return '#262626'; // Dimmed
                 }
                 if (d.degree > 6) return '#a855f7';
@@ -210,42 +212,43 @@ export const ForceDirectedGraph: React.FC<ForceDirectedGraphProps> = ({ tripletE
             });
 
             node.selectAll('text').attr('fill', (d: any) => {
-                if (selectedNodeId && d.id !== selectedNodeId) {
-                    const isNeighbor = linksList.some(l => 
-                        (l.source as D3Node).id === selectedNodeId && (l.target as D3Node).id === d.id ||
-                        (l.target as D3Node).id === selectedNodeId && (l.source as D3Node).id === d.id
-                    );
+                if (selectedNodeIds.length > 0 && !selectedNodeIds.includes(d.id)) {
+                    const isNeighbor = linksList.some(l => {
+                        const sId = (l.source as D3Node).id;
+                        const tId = (l.target as D3Node).id;
+                        return (selectedNodeIds.includes(sId) && tId === d.id) ||
+                               (selectedNodeIds.includes(tId) && sId === d.id);
+                    });
                     return isNeighbor ? '#f5f5f5' : '#525252';
                 }
                 return '#f5f5f5';
             });
 
             link.attr('stroke', (l: any) => {
-                if (selectedNodeId) {
-                    const sourceId = (l.source as D3Node).id;
-                    const targetId = (l.target as D3Node).id;
-                    if (sourceId === selectedNodeId || targetId === selectedNodeId) return '#3b82f6';
+                if (selectedNodeIds.length > 0) {
+                    const sId = (l.source as D3Node).id;
+                    const tId = (l.target as D3Node).id;
+                    if (selectedNodeIds.includes(sId) || selectedNodeIds.includes(tId)) return '#3b82f6';
                     return '#171717';
                 }
                 return '#262626';
             }).attr('stroke-opacity', (l: any) => {
-                if (selectedNodeId) {
-                    const sourceId = (l.source as D3Node).id;
-                    const targetId = (l.target as D3Node).id;
-                    return (sourceId === selectedNodeId || targetId === selectedNodeId) ? 1.0 : 0.15;
+                if (selectedNodeIds.length > 0) {
+                    const sId = (l.source as D3Node).id;
+                    const tId = (l.target as D3Node).id;
+                    return (selectedNodeIds.includes(sId) || selectedNodeIds.includes(tId)) ? 1.0 : 0.15;
                 }
                 return 0.6;
             });
         }
 
-        // Click interaction handlers
+        // Click interaction handlers (Multi-selection Visual Query)
         node.on('click', (event, d) => {
             event.stopPropagation();
-            if (selectedNodeId === d.id) {
-                setSelectedNodeId(null);
-            } else {
-                setSelectedNodeId(d.id);
-            }
+            setSelectedNodeIds(prev => {
+                const isSelected = prev.includes(d.id);
+                return isSelected ? prev.filter(id => id !== d.id) : [...prev, d.id];
+            });
         });
 
         // Hover interaction handlers
@@ -269,7 +272,7 @@ export const ForceDirectedGraph: React.FC<ForceDirectedGraphProps> = ({ tripletE
 
         // Background clicks deselect matches
         svg.on('click', () => {
-            setSelectedNodeId(null);
+            setSelectedNodeIds([]);
         });
 
         // Run highlight refresh
@@ -322,7 +325,7 @@ export const ForceDirectedGraph: React.FC<ForceDirectedGraphProps> = ({ tripletE
         return () => {
             simulation.stop();
         };
-    }, [tripletEdges, vectors, activeSourceFilter, chargeStrength, linkDistance, collisionRadius, showLabels, searchQuery, selectedNodeId]);
+    }, [tripletEdges, vectors, activeSourceFilter, chargeStrength, linkDistance, collisionRadius, showLabels, searchQuery, selectedNodeIds]);
 
     // Zoom Controls
     const zoomTo = (factor: number) => {
@@ -464,64 +467,92 @@ export const ForceDirectedGraph: React.FC<ForceDirectedGraphProps> = ({ tripletE
                         </div>
                     </div>
 
-                    {/* CLICKED NODE DETAILS & ASSOCIATED SNIPPETS */}
-                    {selectedNodeId && (
-                        <div className="space-y-2.5 pt-3 border-t border-neutral-850 font-sans">
+                    {/* CLICKED NODE DETAILS & ASSOCIATED SNIPPETS (Knowledge Map Visual Query Multi-Select) */}
+                    {selectedNodeIds.length > 0 ? (
+                        <div className="space-y-4 pt-3 border-t border-neutral-850 font-sans">
                             <div>
-                                <span className="text-[9px] font-black uppercase tracking-widest text-blue-400">Selected Entity</span>
-                                <h5 className="text-xs font-black text-white mt-0.5 font-mono">{selectedNodeId}</h5>
-                            </div>
-
-                            <div className="space-y-2">
-                                <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block font-mono">Associated Source Snippets ({(() => {
-                                    const associatedSnippets = vectors
-                                        ? vectors.filter(v => v.text.toLowerCase().includes(selectedNodeId.toLowerCase()))
-                                        : [];
-                                    return associatedSnippets.length;
-                                })()})</span>
-                                <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-                                    {(() => {
-                                        const associatedSnippets = vectors
-                                            ? vectors.filter(v => v.text.toLowerCase().includes(selectedNodeId.toLowerCase()))
-                                            : [];
-                                        
-                                        return associatedSnippets.map((snippet, idx) => (
-                                            <div 
-                                                key={idx}
-                                                className="bg-black/40 border border-neutral-850 hover:border-neutral-750 p-2 rounded-lg text-[10px] text-neutral-300 leading-normal space-y-1.5"
+                                <span className="text-[9px] font-black uppercase tracking-widest text-blue-400">Knowledge Map visual Query</span>
+                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                    {selectedNodeIds.map(nodeId => (
+                                        <span 
+                                            key={nodeId} 
+                                            className="bg-blue-950/40 text-blue-300 px-2 py-0.5 rounded border border-blue-900/35 text-[9px] font-mono flex items-center gap-1.5 font-bold"
+                                        >
+                                            {nodeId}
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedNodeIds(prev => prev.filter(id => id !== nodeId));
+                                                }}
+                                                className="text-neutral-500 hover:text-white cursor-pointer font-sans text-[8px]"
                                             >
-                                                <div className="flex justify-between items-center text-[8px] font-mono text-neutral-500 border-b border-neutral-850/60 pb-1">
-                                                    <span className="truncate max-w-[180px]">📄 {snippet.source}</span>
-                                                </div>
-                                                <p className="italic">
-                                                    {(() => {
-                                                        const word = selectedNodeId;
-                                                        const text = snippet.text;
-                                                        const nText = text.toLowerCase();
-                                                        const nWord = word.toLowerCase();
-                                                        const matchIndex = nText.indexOf(nWord);
-                                                        if (matchIndex === -1) return text.substring(0, 150) + '...';
-                                                        
-                                                        const before = text.substring(0, matchIndex);
-                                                        const match = text.substring(matchIndex, matchIndex + word.length);
-                                                        const after = text.substring(matchIndex + word.length);
-                                                        return (
-                                                            <>
-                                                                {before.substring(Math.max(0, matchIndex - 80))}
-                                                                <mark className="bg-blue-500/30 text-blue-300 p-0.5 rounded font-bold">{match}</mark>
-                                                                {after.substring(0, 80)}...
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </p>
-                                            </div>
-                                        ));
-                                    })()}
-                                    {(!vectors || vectors.filter(v => v.text.toLowerCase().includes(selectedNodeId.toLowerCase())).length === 0) && (
-                                        <p className="text-[9px] text-neutral-500 italic">No original text snippets matched this entity.</p>
-                                    )}
+                                                ✕
+                                            </button>
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
+
+                            {(() => {
+                                const uniqueDocuments = Array.from(new Set(vectors?.map(v => v.source).filter(Boolean) || []));
+                                const matchingDocuments = uniqueDocuments.filter(docName => {
+                                    const docChunks = vectors?.filter(v => v.source === docName) || [];
+                                    const combinedText = docChunks.map(v => v.text.toLowerCase()).join(' ');
+                                    return selectedNodeIds.every(nodeId => combinedText.includes(nodeId.toLowerCase()));
+                                });
+
+                                return (
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block font-mono">
+                                                Intersecting Docs ({matchingDocuments.length})
+                                            </span>
+                                            <button 
+                                                onClick={() => setSelectedNodeIds([])} 
+                                                className="text-[9px] text-red-400 hover:underline font-bold uppercase tracking-wider font-mono cursor-pointer"
+                                            >
+                                                Clear All
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="space-y-2.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                                            {matchingDocuments.map((docName, idx) => {
+                                                const docChunks = vectors?.filter(v => v.source === docName) || [];
+                                                return (
+                                                    <div 
+                                                        key={idx}
+                                                        className="bg-black/40 border border-neutral-850 hover:border-neutral-750 p-2.5 rounded-lg text-[10px] text-neutral-300 leading-normal space-y-1.5"
+                                                    >
+                                                        <div className="flex justify-between items-center text-[8px] font-mono text-neutral-500 border-b border-neutral-850/60 pb-1">
+                                                            <span className="truncate text-white font-bold">📄 {docName}</span>
+                                                            <span className="text-[8px] text-blue-400 font-bold bg-blue-950/20 px-1.5 rounded">Intersection</span>
+                                                        </div>
+                                                        
+                                                        <div className="space-y-1 max-h-24 overflow-y-auto custom-scrollbar">
+                                                            {selectedNodeIds.map(nodeId => {
+                                                                const snippet = docChunks.find(v => v.text.toLowerCase().includes(nodeId.toLowerCase()));
+                                                                if (!snippet) return null;
+                                                                return (
+                                                                    <div key={nodeId} className="text-[9px] text-neutral-400 bg-black/20 p-1 rounded border border-neutral-900 font-sans italic line-clamp-1">
+                                                                        <strong className="text-blue-400 font-mono not-italic">{nodeId}:</strong> {snippet.text.substring(0, 100)}...
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                            {matchingDocuments.length === 0 && (
+                                                <p className="text-[9px] text-neutral-500 italic">No documents contain all selected entities.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    ) : (
+                        <div className="p-4 rounded-xl border border-neutral-850 bg-black/20 text-center font-sans text-[10px] text-neutral-500 leading-relaxed">
+                            💡 <strong className="text-neutral-400 font-bold">Knowledge Map visual Query:</strong> Click multiple nodes in the graph to toggle selections and discover document sources containing their factual intersection.
                         </div>
                     )}
 
